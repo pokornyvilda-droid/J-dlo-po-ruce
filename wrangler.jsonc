@@ -1,0 +1,16 @@
+{
+  "name": "j-dlo-po-ruce",
+  "main": "_worker.js",
+  "compatibility_date": "2026-09-10",
+  "assets": {
+    "directory": ".",
+    "binding": "ASSETS"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "jidlo-po-ruce-db",
+      "database_id": "e9c6e5a8-28f3-4e76-a3cf-9da771cc0c4f"
+    }
+  ]
+}
