@@ -670,7 +670,7 @@ function syncHome(){document.body.classList.toggle('home-active',!location.hash)
  const KEY='rs_state_v1';
  const S=JSON.parse(localStorage.getItem(KEY)||'{}');
  S.favs=S.favs||[]; S.cart=S.cart||[]; S.custom=S.custom||[]; S.fridge=S.fridge||[];
- const save = async () => {
+const save = async () => {
   localStorage.setItem(KEY, JSON.stringify(S));
 
   try {
@@ -683,32 +683,48 @@ function syncHome(){document.body.classList.toggle('home-active',!location.hash)
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          name: "Uživatel",
-          people: 1,
-          budget: 0,
+          name: S.profile?.name || "Uživatel",
+          people: Number(S.profile?.people) || 1,
+          budget: Number(S.profile?.budget) || 0,
           preferences: S
         })
       });
 
       const data = await response.json();
 
-      if (data.success && data.user) {
-        userId = String(data.user.id);
-        localStorage.setItem("rs_user_id", userId);
+      if (!response.ok || !data.success || !data.user) {
+        throw new Error(data.error || "Vytvoření profilu se nepodařilo.");
       }
+
+      userId = String(data.user.id);
+      localStorage.setItem("rs_user_id", userId);
+
     } else {
-      await fetch(`/api/user?id=${encodeURIComponent(userId)}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          preferences: S
-        })
-      });
+      const response = await fetch(
+        `/api/user?id=${encodeURIComponent(userId)}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            preferences: S
+          })
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Uložení profilu se nepodařilo.");
+      }
     }
+
+    return true;
+
   } catch (error) {
     console.warn("D1 synchronizace se nepodařila:", error);
+    throw error;
   }
 };
  const ingredients={
