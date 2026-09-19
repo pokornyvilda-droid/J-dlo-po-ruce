@@ -796,23 +796,21 @@ window.saveProfile = async function () {
     preference: document.getElementById("profilePreference")?.value || "normal"
   };
 
+  localStorage.setItem(KEY, JSON.stringify(S));
+
   const msg = document.getElementById("profileSaveMsg");
 
-  try {
-    await save();
-
-    if (msg) {
-      msg.textContent = "✅ Profil uložen.";
-    }
-  } catch (error) {
-    console.error(error);
-
-    if (msg) {
-      msg.textContent = "⚠️ Profil se nepodařilo uložit.";
-    }
+  if (msg) {
+    msg.textContent = "✅ Profil uložen.";
   }
 
   renderProfileGreeting();
+
+  try {
+    await save();
+  } catch (error) {
+    console.warn("D1 záloha se nepodařila:", error);
+  }
 };
 
 
