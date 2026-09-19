@@ -3,8 +3,7 @@
   "main": "_worker.js",
   "compatibility_date": "2026-09-10",
   "assets": {
-    "directory": ".",
-    "binding": "ASSETS"
+    "directory": "."
   },
   "d1_databases": [
     {
