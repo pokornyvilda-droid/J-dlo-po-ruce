@@ -784,9 +784,39 @@ setInterval(() => {
     profileReady = false;
   }
 }, 300);
-async function init(){
-  await loadFromD1();
+function renderProfileGreeting(){
+  const old=document.getElementById("profileGreeting");
+  if(old) old.remove();
 
+  if(location.hash && location.hash!=="#") return;
+
+  const p=S.profile||{};
+  const name=(p.name||"").trim();
+
+  if(!name) return;
+
+  const head=document.querySelector(".head");
+  if(!head) return;
+
+  const box=document.createElement("div");
+  box.id="profileGreeting";
+  box.style.cssText="margin:8px 14px 10px;padding:10px 14px;border-radius:14px;background:rgba(255,255,255,.88);box-shadow:0 4px 14px rgba(23,79,61,.08);";
+
+  const preference={
+    normal:"🍽️ Normální jídlo",
+    protein:"💪 Více bílkovin",
+    light:"🥗 Lehčí jídla"
+  }[p.preference||"normal"];
+
+  box.innerHTML=
+    `<strong>👋 Ahoj, ${name}</strong><br>`+
+    `<span style="font-size:13px;color:#555">Jídlo pro ${Number(p.people)||1} osoby · ${preference}</span>`;
+
+  head.appendChild(box);
+}
+  async function init(){
+  await loadFromD1();
+renderProfileGreeting();
   addFavPage();
   renderCart();
   renderCustom();
