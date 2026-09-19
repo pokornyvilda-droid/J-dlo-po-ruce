@@ -809,7 +809,7 @@ function renderProfileGreeting(){
   }[p.preference||"normal"];
 
   box.innerHTML=
-    `<strong style="color:#174f3d">👋 Ahoj, ${name}</strong><br>`+
+    `<strong style="color:#174f3d;font-size:18px;font-weight:700">👋 Ahoj, ${name}</strong><br>`+
     `<span style="font-size:13px;color:#555">Jídlo pro ${Number(p.people)||1} osoby · ${preference}</span>`;
 
   head.appendChild(box);
