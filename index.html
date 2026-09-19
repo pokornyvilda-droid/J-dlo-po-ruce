@@ -130,54 +130,9 @@ input,textarea,select{width:100%;padding:12px;border:1px solid var(--line);borde
   </div>
 
   <a class="btn secondary" href="#oblibene">❤️ Oblíbená jídla</a>
-</section><script>
-function renderProfile(){
-  const p = S.profile || {};
+</section>
 
-  const name = document.getElementById("profileName");
-  const people = document.getElementById("profilePeople");
-  const budget = document.getElementById("profileBudget");
-  const preference = document.getElementById("profilePreference");
 
-  if(name) name.value = p.name || "";
-  if(people) people.value = Number(p.people) || 1;
-  if(budget) budget.value = Number(p.budget) || 0;
-  if(preference) preference.value = p.preference || "normal";
-}
-
-async function saveProfile(){
-  S.profile = {
-    name: document.getElementById("profileName")?.value.trim() || "Uživatel",
-    people: Number(document.getElementById("profilePeople")?.value) || 1,
-    budget: Number(document.getElementById("profileBudget")?.value) || 0,
-    preference: document.getElementById("profilePreference")?.value || "normal"
-  };
-
-  await save();
-
-  const msg = document.getElementById("profileSaveMsg");
-  if(msg) msg.textContent = "✅ Profil uložen.";
-}
-
-let profileReady = false;
-
-setInterval(() => {
-  if(
-    location.hash === "#profil" &&
-    typeof S !== "undefined" &&
-    typeof d1Loaded !== "undefined" &&
-    d1Loaded &&
-    !profileReady
-  ){
-    renderProfile();
-    profileReady = true;
-  }
-
-  if(location.hash !== "#profil"){
-    profileReady = false;
-  }
-}, 300);
-</script>
 <section class="page" id="j1"><a class="btn secondary" href="#jidla">← Zpět na jídla</a>
 <h1>1. Kuřecí na paprice s rýží</h1><div class="pill">Rodina · 30 min</div>
 <div class="detail"><h2>🛒 Suroviny</h2><p>4 kuřecí prsa, 1 cibule, 200 ml smetany, 1 lžička sladké papriky, 300 g rýže</p>
@@ -645,7 +600,52 @@ async function loadFromD1(){
     console.warn("Načtení dat z D1 se nepodařilo:",error);
   }
 }
+function renderProfile() {
+  const p = S.profile || {};
 
+  const name = document.getElementById("profileName");
+  const people = document.getElementById("profilePeople");
+  const budget = document.getElementById("profileBudget");
+  const preference = document.getElementById("profilePreference");
+
+  if (name) name.value = p.name || "";
+  if (people) people.value = Number(p.people) || 1;
+  if (budget) budget.value = Number(p.budget) || 0;
+  if (preference) preference.value = p.preference || "normal";
+}
+
+window.saveProfile = async function () {
+  S.profile = {
+    name: document.getElementById("profileName")?.value.trim() || "Uživatel",
+    people: Number(document.getElementById("profilePeople")?.value) || 1,
+    budget: Number(document.getElementById("profileBudget")?.value) || 0,
+    preference: document.getElementById("profilePreference")?.value || "normal"
+  };
+
+  await save();
+
+  const msg = document.getElementById("profileSaveMsg");
+  if (msg) msg.textContent = "✅ Profil uložen.";
+};
+
+let profileReady = false;
+
+setInterval(() => {
+  if (
+    location.hash === "#profil" &&
+    typeof S !== "undefined" &&
+    typeof d1Loaded !== "undefined" &&
+    d1Loaded &&
+    !profileReady
+  ) {
+    renderProfile();
+    profileReady = true;
+  }
+
+  if (location.hash !== "#profil") {
+    profileReady = false;
+  }
+}, 300);
 async function init(){
   await loadFromD1();
 
