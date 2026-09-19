@@ -88,7 +88,96 @@ input,textarea,select{width:100%;padding:12px;border:1px solid var(--line);borde
 <section class="page" id="nakup"><a class="btn secondary" href="#">← Domů</a><div class="hero"><h1>🛒 Můj nákup</h1><p>Seznam, který se plní z jídel i ručně.</p></div><div class="detail"><div id="cartList"></div><div class="action-row"><input id="newItem" placeholder="Přidat vlastní položku…"><button class="btn" id="addItem">＋ Přidat</button></div><div class="action-row"><button class="btn secondary" id="clearChecked">✓ Odstranit odškrtnuté</button><a class="btn" href="#nakup-pomoc">🛒 Pomoz mi nakoupit</a></div></div></section>
 <section class="page" id="nakup-pomoc"><a class="btn secondary" href="#nakup">← Zpět</a><div class="hero"><h1>🛒 Pomoz mi nakoupit</h1><p>Vyber obchod. Seznam pak rozdělíme do praktických skupin.</p></div><div class="grid4"><a class="choice store-choice" data-store="BILLA" href="#nakup-plan"><h3>🟢 BILLA</h3></a><a class="choice store-choice" data-store="PENNY" href="#nakup-plan"><h3>🔴 PENNY</h3></a><a class="choice store-choice" data-store="Lidl" href="#nakup-plan"><h3>🔵 Lidl</h3></a><a class="choice store-choice" data-store="Albert" href="#nakup-plan"><h3>🟠 Albert</h3></a><a class="choice store-choice" data-store="Kaufland" href="#nakup-plan"><h3>🟡 Kaufland</h3></a><a class="choice store-choice" data-store="Tesco" href="#nakup-plan"><h3>🔵 Tesco</h3></a><a class="choice store-choice" data-store="Jiný obchod" href="#nakup-plan"><h3>➕ Jiný obchod</h3></a></div></section>
 <section class="page" id="nakup-plan"><a class="btn secondary" href="#nakup-pomoc">← Zpět</a><div class="hero"><div class="muted">Vybraný obchod</div><h1 id="storeTitle">🛒 Nákupní plán</h1><p>Hotový seznam k projití. Položky můžeš odškrtávat.</p></div><div class="detail"><div id="planList"></div><div class="note">Sortiment a umístění se mohou podle konkrétní prodejny lišit. Aplikace připravuje seznam, neobjednává zboží.</div></div></section>
-<section class="page" id="profil"><a class="btn secondary" href="#">← Domů</a><h1>👤 Profil</h1><div class="row">Počet lidí</div><div class="row">Rozpočet</div><div class="row">Preference</div><div class="row">Oblíbená jídla ⭐</div></section>
+<section class="page" id="profil">
+  <a class="btn secondary" href="#">← Domů</a>
+
+  <div class="hero">
+    <span class="pill">Můj profil</span>
+    <h1>👤 Nastavení pro mě</h1>
+    <p>Tyto údaje pomůžou aplikaci vybírat jídla podle tebe.</p>
+  </div>
+
+  <div class="detail">
+    <label>
+      Jak ti máme říkat?
+      <input id="profileName" type="text" placeholder="Např. Vilda">
+    </label>
+
+    <label>
+      Kolik lidí běžně vaříš?
+      <input id="profilePeople" type="number" min="1" max="20" value="1">
+    </label>
+
+    <label>
+      Rozpočet na jídlo
+      <input id="profileBudget" type="number" min="0" step="100" placeholder="Např. 5000">
+    </label>
+
+    <label>
+      Co preferuješ?
+      <select id="profilePreference">
+        <option value="normal">🍽️ Normální jídlo</option>
+        <option value="protein">💪 Více bílkovin</option>
+        <option value="light">🥗 Lehčí jídla</option>
+      </select>
+    </label>
+
+    <button class="btn" type="button" onclick="saveProfile()">💾 Uložit profil</button>
+
+    <div class="note" id="profileSaveMsg">
+      Údaje se uloží do aplikace.
+    </div>
+  </div>
+
+  <a class="btn secondary" href="#oblibene">❤️ Oblíbená jídla</a>
+</section><script>
+function renderProfile(){
+  const p = S.profile || {};
+
+  const name = document.getElementById("profileName");
+  const people = document.getElementById("profilePeople");
+  const budget = document.getElementById("profileBudget");
+  const preference = document.getElementById("profilePreference");
+
+  if(name) name.value = p.name || "";
+  if(people) people.value = Number(p.people) || 1;
+  if(budget) budget.value = Number(p.budget) || 0;
+  if(preference) preference.value = p.preference || "normal";
+}
+
+async function saveProfile(){
+  S.profile = {
+    name: document.getElementById("profileName")?.value.trim() || "Uživatel",
+    people: Number(document.getElementById("profilePeople")?.value) || 1,
+    budget: Number(document.getElementById("profileBudget")?.value) || 0,
+    preference: document.getElementById("profilePreference")?.value || "normal"
+  };
+
+  await save();
+
+  const msg = document.getElementById("profileSaveMsg");
+  if(msg) msg.textContent = "✅ Profil uložen.";
+}
+
+let profileReady = false;
+
+setInterval(() => {
+  if(
+    location.hash === "#profil" &&
+    typeof S !== "undefined" &&
+    typeof d1Loaded !== "undefined" &&
+    d1Loaded &&
+    !profileReady
+  ){
+    renderProfile();
+    profileReady = true;
+  }
+
+  if(location.hash !== "#profil"){
+    profileReady = false;
+  }
+}, 300);
+</script>
 <section class="page" id="j1"><a class="btn secondary" href="#jidla">← Zpět na jídla</a>
 <h1>1. Kuřecí na paprice s rýží</h1><div class="pill">Rodina · 30 min</div>
 <div class="detail"><h2>🛒 Suroviny</h2><p>4 kuřecí prsa, 1 cibule, 200 ml smetany, 1 lžička sladké papriky, 300 g rýže</p>
