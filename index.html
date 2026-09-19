@@ -466,7 +466,47 @@ function syncHome(){document.body.classList.toggle('home-active',!location.hash)
  const KEY='rs_state_v1';
  const S=JSON.parse(localStorage.getItem(KEY)||'{}');
  S.favs=S.favs||[]; S.cart=S.cart||[]; S.custom=S.custom||[]; S.fridge=S.fridge||[];
- const save=()=>localStorage.setItem(KEY,JSON.stringify(S));
+ const save = async () => {
+  localStorage.setItem(KEY, JSON.stringify(S));
+
+  try {
+    let userId = localStorage.getItem("rs_user_id");
+
+    if (!userId) {
+      const response = await fetch("/api/user", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          name: "Uživatel",
+          people: 1,
+          budget: 0,
+          preferences: S
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.user) {
+        userId = String(data.user.id);
+        localStorage.setItem("rs_user_id", userId);
+      }
+    } else {
+      await fetch(`/api/user?id=${encodeURIComponent(userId)}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          preferences: S
+        })
+      });
+    }
+  } catch (error) {
+    console.warn("D1 synchronizace se nepodařila:", error);
+  }
+};
  const ingredients={
  1:['kuřecí prsa','rýže','cibule','paprika','smetana','olej'],2:['těstoviny','šunka','sýr','vejce','smetana'],3:['brambory','cibule','párek','paprika','rajčatový protlak'],4:['kuřecí prsa','rýže','zelenina','olej'],5:['špagety','mleté maso','rajčatový protlak','cibule','sýr'],6:['čočka','vejce','cibule','ocet'],7:['kuře','brambory','olej','koření'],8:['mleté maso','rajčatový protlak','těstoviny','rýže','cibule'],9:['vepřové maso','rýže','cibule','vývar'],10:['kuřecí prsa','strouhanka','vejce','brambory'],11:['kuřecí maso','rýže','zelenina','cibule'],12:['brambory','maso','cibule','sýr','smetana'],13:['mouka','vejce','mléko','tvaroh'],14:['vejce','šunka','máslo'],15:['těstoviny','kuřecí maso','smetana','sýr'],16:['kuřecí prsa','rýže','zelenina'],17:['tuňák','tortilla','zelenina','jogurt'],18:['skyr','banán','ovesné vločky'],19:['cottage','pečivo','zelenina'],20:['vejce','ovesné vločky','banán','skyr'],21:['tvaroh','ovoce'],22:['hovězí maso','brambory'],23:['vejce','tortilla','sýr','zelenina'],24:['kuřecí maso','salát','pečivo'],25:['tvaroh','tortilla','banán'],26:['vejce','toast','avokádo'],27:['jogurt','ovesné vločky','ovoce'],28:['kuřecí maso','kuskus','zelenina'],29:['šunka','cottage','toast'],30:['tuňák','rýže','zelenina'],31:['kuřecí maso','tortilla','sýr'],32:['ovesné vločky','skyr','banán'],33:['rýže','vejce','zelenina'],34:['skyr','banán','pečivo','šunka'],35:['proteinový nápoj','banán','pečivo'],36:['tuňák','chléb','jablko'],37:['hotové kuře','rýže'],38:['cottage','rohlík','rajče'],39:['maso','příloha','zelenina'],40:['tortilla','šunka','sýr'],41:['vejce','toast'],42:['cottage','zelenina','pečivo'],43:['tvaroh','banán','kakao'],44:['vejce','šunka','sýr'],45:['tuňák','toast','sýr'],46:['skyr','jablko','skořice'],47:['hotové kuře','tortilla','zelenina'],48:['mozzarella','šunka','pečivo'],49:['jogurt','ovoce','ořechy'],50:['vepřové maso','brambory','kmín'],51:['fazole','cibule','chléb','paprika'],52:['sýr','brambory','vejce','strouhanka'],53:['kuřecí maso','brambory','mléko'],54:['mouka','vejce','mléko','šunka','sýr'],55:['kuřecí maso','mrkev','nudle','cibule'],56:['mleté maso','vejce','strouhanka','brambory'],57:['česnek','vejce','sýr','brambory'],58:['kuřecí maso','rýže','kari','kokosové mléko'],59:['hrách','párek','cibule','chléb'],60:['květák','šunka','vejce','sýr','smetana']};
  ingredientsExt={61:['cibule', 'olej', 'sůl', 'pepř'],62:['vepřové maso', 'cibule', 'olej'],63:['cibule', 'olej', 'sůl', 'pepř'],64:['hovězí maso', 'cibule', 'olej'],65:['vejce', 'máslo', 'sůl'],66:['brambory', 'cibule', 'olej'],67:['brambory', 'cibule', 'olej'],68:['cibule', 'olej', 'sůl', 'pepř'],69:['brambory', 'cibule', 'olej'],70:['cibule', 'olej', 'sůl', 'pepř'],71:['vepřové maso', 'cibule', 'olej'],72:['kuřecí maso', 'cibule', 'olej'],73:['brambory', 'cibule', 'olej'],74:['brambory', 'cibule', 'olej'],75:['hovězí maso', 'cibule', 'olej'],76:['cibule', 'olej', 'sůl', 'pepř'],77:['cibule', 'olej', 'sůl', 'pepř'],78:['cibule', 'olej', 'sůl', 'pepř'],79:['cibule', 'olej', 'sůl', 'pepř'],80:['cibule', 'olej', 'sůl', 'pepř'],81:['brambory', 'cibule', 'olej'],82:['cibule', 'olej', 'sůl', 'pepř'],83:['cibule', 'olej', 'sůl', 'pepř'],84:['cibule', 'olej', 'sůl', 'pepř'],85:['cibule', 'olej', 'sůl', 'pepř'],86:['vejce', 'máslo', 'sůl'],87:['cibule', 'olej', 'sůl', 'pepř'],88:['brambory', 'cibule', 'olej'],89:['cibule', 'olej', 'sůl', 'pepř'],90:['kuřecí maso', 'cibule', 'olej'],91:['vepřové maso', 'cibule', 'olej'],92:['hovězí maso', 'cibule', 'olej'],93:['cibule', 'olej', 'sůl', 'pepř'],94:['cibule', 'olej', 'sůl', 'pepř'],95:['vejce', 'máslo', 'sůl'],96:['cibule', 'olej', 'sůl', 'pepř'],97:['cibule', 'olej', 'sůl', 'pepř'],98:['cibule', 'olej', 'sůl', 'pepř'],99:['cibule', 'olej', 'sůl', 'pepř'],100:['tvaroh', 'ovoce'],101:['kuřecí maso', 'cibule', 'olej'],102:['kuřecí maso', 'cibule', 'olej'],103:['vepřové maso', 'cibule', 'olej'],104:['hovězí maso', 'cibule', 'olej'],105:['brambory', 'cibule', 'olej'],106:['brambory', 'cibule', 'olej'],107:['těstoviny', 'sýr', 'cibule'],108:['těstoviny', 'sýr', 'cibule'],109:['cibule', 'olej', 'sůl', 'pepř'],110:['cibule', 'olej', 'sůl', 'pepř'],111:['kuřecí maso', 'cibule', 'olej'],112:['cibule', 'olej', 'sůl', 'pepř'],113:['cibule', 'olej', 'sůl', 'pepř'],114:['těstoviny', 'sýr', 'cibule'],115:['cibule', 'olej', 'sůl', 'pepř'],116:['cibule', 'olej', 'sůl', 'pepř'],117:['cibule', 'olej', 'sůl', 'pepř'],118:['cibule', 'olej', 'sůl', 'pepř'],119:['cibule', 'olej', 'sůl', 'pepř'],120:['těstoviny', 'sýr', 'cibule'],121:['vejce', 'máslo', 'sůl'],122:['cibule', 'olej', 'sůl', 'pepř'],123:['vejce', 'máslo', 'sůl'],124:['cibule', 'olej', 'sůl', 'pepř'],125:['vejce', 'máslo', 'sůl'],126:['cibule', 'olej', 'sůl', 'pepř'],127:['cibule', 'olej', 'sůl', 'pepř'],128:['cibule', 'olej', 'sůl', 'pepř'],129:['tvaroh', 'ovoce'],130:['cibule', 'olej', 'sůl', 'pepř'],131:['vejce', 'máslo', 'sůl'],132:['cibule', 'olej', 'sůl', 'pepř'],133:['cibule', 'olej', 'sůl', 'pepř'],134:['cibule', 'olej', 'sůl', 'pepř'],135:['cibule', 'olej', 'sůl', 'pepř'],136:['kuřecí maso', 'cibule', 'olej'],137:['hovězí maso', 'cibule', 'olej'],138:['cibule', 'olej', 'sůl', 'pepř'],139:['cibule', 'olej', 'sůl', 'pepř'],140:['tvaroh', 'ovoce'],141:['vejce', 'máslo', 'sůl'],142:['tvaroh', 'ovoce'],143:['kuřecí maso', 'cibule', 'olej'],144:['cibule', 'olej', 'sůl', 'pepř'],145:['kuřecí maso', 'cibule', 'olej'],146:['hovězí maso', 'cibule', 'olej'],147:['cibule', 'olej', 'sůl', 'pepř'],148:['cibule', 'olej', 'sůl', 'pepř'],149:['tvaroh', 'ovoce'],150:['cibule', 'olej', 'sůl', 'pepř'],151:['cibule', 'olej', 'sůl', 'pepř'],152:['cibule', 'olej', 'sůl', 'pepř'],153:['cibule', 'olej', 'sůl', 'pepř'],154:['cibule', 'olej', 'sůl', 'pepř'],155:['cibule', 'olej', 'sůl', 'pepř'],156:['tvaroh', 'ovoce'],157:['tvaroh', 'ovoce'],158:['cibule', 'olej', 'sůl', 'pepř'],159:['cibule', 'olej', 'sůl', 'pepř'],160:['cibule', 'olej', 'sůl', 'pepř'],161:['cibule', 'olej', 'sůl', 'pepř'],162:['vejce', 'máslo', 'sůl'],163:['cibule', 'olej', 'sůl', 'pepř'],164:['cibule', 'olej', 'sůl', 'pepř'],165:['tvaroh', 'ovoce'],166:['kuřecí maso', 'cibule', 'olej'],167:['hovězí maso', 'cibule', 'olej'],168:['cibule', 'brambory', 'vývar'],169:['cibule', 'brambory', 'vývar'],170:['kuřecí maso', 'cibule', 'olej'],171:['cibule', 'brambory', 'vývar'],172:['cibule', 'brambory', 'vývar'],173:['cibule', 'brambory', 'vývar'],174:['cibule', 'brambory', 'vývar'],175:['cibule', 'brambory', 'vývar'],176:['cibule', 'olej', 'sůl', 'pepř'],177:['tvaroh', 'ovoce'],178:['cibule', 'olej', 'sůl', 'pepř'],179:['cibule', 'olej', 'sůl', 'pepř'],180:['cibule', 'olej', 'sůl', 'pepř'],181:['tvaroh', 'ovoce'],182:['cibule', 'olej', 'sůl', 'pepř'],183:['cibule', 'olej', 'sůl', 'pepř'],184:['tvaroh', 'ovoce'],185:['tvaroh', 'ovoce']}; Object.assign(ingredients,ingredientsExt);
