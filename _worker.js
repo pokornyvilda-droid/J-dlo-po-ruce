@@ -2,17 +2,21 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    // TEST D1
     if (url.pathname === "/api/db-test") {
       try {
-        const result = await env.DB
-          .prepare("SELECT 1 AS ok")
-          .first();
+        const tables = await env.DB
+          .prepare(`
+            SELECT name, sql
+            FROM sqlite_master
+            WHERE type = 'table'
+            ORDER BY name
+          `)
+          .all();
 
         return Response.json({
           success: true,
           database: "connected",
-          result
+          tables: tables.results
         });
       } catch (error) {
         return Response.json(
@@ -25,7 +29,6 @@ export default {
       }
     }
 
-    // Všechno ostatní necháme obsloužit webem
     return env.ASSETS.fetch(request);
   }
 };
