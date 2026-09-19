@@ -732,8 +732,35 @@ async function init(){
 }
  // Vylepšený nákupní pomocník
  const oldAddCart=addCart;
- function norm(s){return s.toLowerCase().trim();}
- function addCart(items){items.forEach(x=>{let n=String(x||'').trim();if(!n)return;let f=S.cart.find(c=>norm(c.name)===norm(n));if(f)f.qty=(f.qty||1)+1;else S.cart.push({name:n,qty:1,checked:false});});save();renderCart();renderPlan();}
+
+function norm(s){
+  return s.toLowerCase().trim();
+}
+
+function addCart(items){
+  const people=Math.max(1,Number(S.profile?.people)||1);
+
+  items.forEach(x=>{
+    const n=String(x||'').trim();
+    if(!n)return;
+
+    let f=S.cart.find(c=>norm(c.name)===norm(n));
+
+    if(f){
+      f.qty=(f.qty||1)+people;
+    }else{
+      S.cart.push({
+        name:n,
+        qty:people,
+        checked:false
+      });
+    }
+  });
+
+  save();
+  renderCart();
+  renderPlan();
+}
  function removeChecked(){S.cart=S.cart.filter(c=>!c.checked);save();renderCart();renderPlan();}
  function renderCart(){const sec=document.querySelector('#nakup');if(!sec)return;const list=sec.querySelector('#cartList');if(!list)return;list.innerHTML='';if(!S.cart.length){list.innerHTML='<div class="note">Nákup je zatím prázdný. U jídla klepni na „Přidat suroviny do nákupu“.</div>';}else{S.cart.forEach((c,i)=>{const l=document.createElement('label');l.className='row';l.innerHTML=`<input type="checkbox" ${c.checked?'checked':''}> <b>${c.name}</b> <span class="muted">×${c.qty||1}</span>`;l.querySelector('input').onchange=e=>{c.checked=e.target.checked;save();renderPlan();};list.appendChild(l);});}const inp=sec.querySelector('#newItem'),btn=sec.querySelector('#addItem'),clr=sec.querySelector('#clearChecked');if(btn)btn.onclick=()=>{let v=inp.value.trim();if(v){addCart([v]);inp.value='';}};if(clr)clr.onclick=removeChecked;}
  const groupOrder=['🥩 Maso a uzeniny','🥛 Mléčné a vejce','🥦 Ovoce a zelenina','🍚 Přílohy a pečivo','🥫 Trvanlivé','🧂 Ostatní'];
