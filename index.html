@@ -772,7 +772,6 @@ function renderProfile() {
   if (budget) budget.value = Number(p.budget) || 0;
   if (preference) preference.value = p.preference || "normal";
 }
-
 window.saveProfile = async function () {
   S.profile = {
     name: document.getElementById("profileName")?.value.trim() || "Uživatel",
@@ -781,11 +780,26 @@ window.saveProfile = async function () {
     preference: document.getElementById("profilePreference")?.value || "normal"
   };
 
-  await save();
-
   const msg = document.getElementById("profileSaveMsg");
-  if (msg) msg.textContent = "✅ Profil uložen.";
+
+  try {
+    await save();
+
+    if (msg) {
+      msg.textContent = "✅ Profil uložen.";
+    }
+  } catch (error) {
+    console.error(error);
+
+    if (msg) {
+      msg.textContent = "⚠️ Profil se nepodařilo uložit.";
+    }
+  }
+
+  renderProfileGreeting();
 };
+
+
 
 let profileReady = false;
 
