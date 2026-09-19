@@ -2,7 +2,6 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    // Pomocná funkce pro JSON odpovědi
     const json = (data, status = 200) =>
       new Response(JSON.stringify(data), {
         status,
@@ -11,16 +10,12 @@ export default {
         }
       });
 
-    // =========================
-    // API: UŽIVATEL
-    // =========================
-
-    // GET /api/user?id=1
+    // Načtení uživatele
     if (url.pathname === "/api/user" && request.method === "GET") {
       const id = url.searchParams.get("id");
 
       if (!id) {
-        return json({ success: false, error: "Chybí id uživatele." }, 400);
+        return json({ success: false, error: "Chybí id." }, 400);
       }
 
       try {
@@ -37,29 +32,16 @@ export default {
           return json({ success: false, error: "Uživatel nenalezen." }, 404);
         }
 
-        return json({
-          success: true,
-          user
-        });
+        return json({ success: true, user });
       } catch (error) {
-        return json({
-          success: false,
-          error: String(error)
-        }, 500);
+        return json({ success: false, error: String(error) }, 500);
       }
     }
 
-    // POST /api/user
+    // Vytvoření uživatele
     if (url.pathname === "/api/user" && request.method === "POST") {
       try {
         const body = await request.json();
-
-        const name = body.name || "";
-        const people = Number(body.people) || 1;
-        const budget = Number(body.budget) || 0;
-        const preferences = body.preferences
-          ? JSON.stringify(body.preferences)
-          : null;
 
         const result = await env.DB
           .prepare(`
@@ -68,25 +50,55 @@ export default {
             VALUES (?, ?, ?, ?)
             RETURNING id, name, people, budget, created_at, preferences
           `)
-          .bind(name, people, budget, preferences)
+          .bind(
+            body.name || "Uživatel",
+            Number(body.people) || 1,
+            Number(body.budget) || 0,
+            JSON.stringify(body.preferences || {})
+          )
           .first();
 
-        return json({
-          success: true,
-          user: result
-        }, 201);
+        return json({ success: true, user: result }, 201);
       } catch (error) {
-        return json({
-          success: false,
-          error: String(error)
-        }, 500);
+        return json({ success: false, error: String(error) }, 500);
       }
     }
 
-    // =========================
-    // TEST DATABÁZE
-    // =========================
+    // Aktualizace stavu aplikace
+    if (url.pathname === "/api/user" && request.method === "PUT") {
+      const id = url.searchParams.get("id");
 
+      if (!id) {
+        return json({ success: false, error: "Chybí id." }, 400);
+      }
+
+      try {
+        const body = await request.json();
+
+        const result = await env.DB
+          .prepare(`
+            UPDATE users
+            SET preferences = ?
+            WHERE id = ?
+            RETURNING id, name, people, budget, created_at, preferences
+          `)
+          .bind(
+            JSON.stringify(body.preferences || {}),
+            id
+          )
+          .first();
+
+        if (!result) {
+          return json({ success: false, error: "Uživatel nenalezen." }, 404);
+        }
+
+        return json({ success: true, user: result });
+      } catch (error) {
+        return json({ success: false, error: String(error) }, 500);
+      }
+    }
+
+    // Test / diagnostika D1
     if (url.pathname === "/api/db-test") {
       try {
         const tables = await env.DB
@@ -104,16 +116,9 @@ export default {
           tables: tables.results
         });
       } catch (error) {
-        return json({
-          success: false,
-          error: String(error)
-        }, 500);
+        return json({ success: false, error: String(error) }, 500);
       }
     }
-
-    // =========================
-    // WEB
-    // =========================
 
     return env.ASSETS.fetch(request);
   }
