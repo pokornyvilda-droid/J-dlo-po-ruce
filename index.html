@@ -809,7 +809,7 @@ function renderProfileGreeting(){
   const old=document.getElementById("profileGreeting");
   if(old) old.remove();
 
-  if(location.hash && location.hash!=="#") return;
+  
 
   const p=S.profile||{};
   const name=(p.name||"").trim();
