@@ -902,7 +902,53 @@ function addCart(items){
   renderPlan();
 }
  function removeChecked(){S.cart=S.cart.filter(c=>!c.checked);save();renderCart();renderPlan();}
- function renderCart(){const sec=document.querySelector('#nakup');if(!sec)return;const list=sec.querySelector('#cartList');if(!list)return;list.innerHTML='';if(!S.cart.length){list.innerHTML='<div class="note">Nákup je zatím prázdný. U jídla klepni na „Přidat suroviny do nákupu“.</div>';}else{S.cart.forEach((c,i)=>{const l=document.createElement('label');l.className='row';l.innerHTML=`<input type="checkbox" ${c.checked?'checked':''}> <b>${c.name}</b> <span class="muted">×${c.qty||1}</span>`;l.querySelector('input').onchange=e=>{c.checked=e.target.checked;save();renderPlan();};list.appendChild(l);});}const inp=sec.querySelector('#newItem'),btn=sec.querySelector('#addItem'),clr=sec.querySelector('#clearChecked');if(btn)btn.onclick=()=>{let v=inp.value.trim();if(v){addCart([v]);inp.value='';}};if(clr)clr.onclick=removeChecked;}
+ function renderCart(){
+  const sec=document.querySelector('#nakup');
+  if(!sec)return;
+
+  const list=sec.querySelector('#cartList');
+  if(!list)return;
+
+  list.innerHTML='';
+
+  if(!S.cart.length){
+    list.innerHTML='<div class="note">Nákup je zatím prázdný.<br>U jídla klepni na „Přidat suroviny do nákupu“.</div>';
+  }else{
+    S.cart.forEach((c,i)=>{
+      const l=document.createElement('label');
+
+      l.className='row';
+      l.style.cssText='display:flex!important;align-items:center!important;gap:12px!important;margin:7px 0!important;padding:12px 14px!important;box-sizing:border-box!important;';
+
+      l.innerHTML=
+        `<input type="checkbox" ${c.checked?'checked':''} style="margin:0!important;flex:0 0 auto!important;width:18px!important;height:18px!important;">
+         <b style="flex:1!important;text-align:left!important;">${c.name}</b>
+         <span class="muted" style="margin-left:auto!important;white-space:nowrap!important;">×${c.qty||1}</span>`;
+
+      l.querySelector('input').onchange=e=>{
+        c.checked=e.target.checked;
+        save();
+        renderPlan();
+      };
+
+      list.appendChild(l);
+    });
+  }
+
+  const inp=sec.querySelector('#newItem');
+  const btn=sec.querySelector('#addItem');
+  const clr=sec.querySelector('#clearChecked');
+
+  if(btn)btn.onclick=()=>{
+    let v=inp.value.trim();
+    if(v){
+      addCart([v]);
+      inp.value='';
+    }
+  };
+
+  if(clr)clr.onclick=removeChecked;
+}
  const groupOrder=['🥩 Maso a uzeniny','🥛 Mléčné a vejce','🥦 Ovoce a zelenina','🍚 Přílohy a pečivo','🥫 Trvanlivé','🧂 Ostatní'];
  function groupFor(n){const x=norm(n);if(/kuř|vepř|hově|mleté|maso|šunka|párek|klobás|tuňák|mozz|sýr/.test(x))return x.includes('sýr')||x.includes('mozz')||x.includes('šunka')?'🥛 Mléčné a vejce':'🥩 Maso a uzeniny';if(/vejce|skyr|cottage|tvaroh|jogurt|smetan|mléko|máslo/.test(x))return '🥛 Mléčné a vejce';if(/banán|jablko|rajče|zelenin|salát|paprika|mrkev|květák|ovoce|avokádo/.test(x))return '🥦 Ovoce a zelenina';if(/rýže|těstovin|špaget|chléb|pečivo|rohlík|toast|tortilla|kuskus|brambor|vločk/.test(x))return '🍚 Přílohy a pečivo';if(/protlak|fazole|čočka|hrách|kakao|ořech|koko|kari|sój|vývar/.test(x))return '🥫 Trvanlivé';return '🧂 Ostatní';}
  function renderPlan(){const p=document.querySelector('#planList');if(!p)return;const store=localStorage.getItem('rs_store')||'Vyber obchod';const t=document.querySelector('#storeTitle');if(t)t.textContent='🛒 '+store;const groups={};S.cart.forEach(c=>(groups[groupFor(c.name)]??=[]).push(c));p.innerHTML='';if(!S.cart.length){p.innerHTML='<div class="note">Seznam je prázdný.</div>';return;}groupOrder.forEach(g=>{if(!groups[g]?.length)return;const h=document.createElement('h2');h.textContent=g;p.appendChild(h);groups[g].forEach((c)=>{const l=document.createElement('label');l.className='row';l.innerHTML=`<input type="checkbox" ${c.checked?'checked':''}> ${c.name} <span class="muted">×${c.qty||1}</span>`;l.querySelector('input').onchange=e=>{c.checked=e.target.checked;save();renderCart();};p.appendChild(l);});});}
