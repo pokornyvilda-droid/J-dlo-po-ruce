@@ -664,7 +664,13 @@ function renderRecs(){
     `${first.length} konkrétní volby podle: ${state.place==='doma'?'doma':state.place==='obchod'?'obchod':state.place==='cesty'?'cesty':'restaurace'} · ${state.time==='10'?'do 10 min':state.time==='30'?'do 30 min':'bez limitu'} · ${preferenceText}.`;
 }
 document.querySelectorAll('.wizard-choice').forEach(el=>el.addEventListener('click',()=>{state[el.dataset.q]=el.dataset.v;if(el.dataset.q==='need')setTimeout(renderRecs,0)}));
-function syncHome(){document.body.classList.toggle('home-active',!location.hash);if(location.hash==='#dop'||location.hash==='#dopvice')renderRecs()}syncHome();window.addEventListener('hashchange',syncHome);
+function syncHome(){
+  const isHome=!location.hash||location.hash==='#';
+  document.body.classList.toggle('home-active',isHome);
+  const bottom=document.querySelector('.bottom');
+  if(bottom) bottom.style.display=isHome?'none':'';
+  if(location.hash==='#dop'||location.hash==='#dopvice')renderRecs();
+}syncHome();window.addEventListener('hashchange',syncHome);
 
 /* Jídlo po ruce – společné funkce */
 (function(){
