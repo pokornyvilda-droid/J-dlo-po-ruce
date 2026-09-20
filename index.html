@@ -1041,23 +1041,23 @@ function addCart(items){
  function groupFor(n){
   const x=norm(n);
 
-  if(['kure','kureci','veprove','vepro','hovezi','hove','mlete','maso','sunka','parek','klobasa','tunak'].some(k=>x.includes(k))){
+  if(/(^|\\s)(kure|kureci|veprove|vepro|hovezi|hove|mlete|maso|sunka|parek|klobasa|tunak)(\\s|$)/.test(x)){
     return x.includes('sunka') ? '🥛 Mléčné a vejce' : '🥩 Maso a uzeniny';
   }
 
-  if(['vejce','skyr','cottage','tvaroh','jogurt','smetana','mleko','maslo','syr','mozzarella'].some(k=>x.includes(k))){
+  if(/vejce|skyr|cottage|tvaroh|jogurt|smetana|mleko|maslo|syr|mozzarella/.test(x)){
     return '🥛 Mléčné a vejce';
   }
 
-  if(['banan','jablko','rajce','okurek','okurky','zelenina','salat','paprika','mrkev','kvetak','ovoce','avokado'].some(k=>x.includes(k))){
+  if(/banan|jablko|rajce|rajcata|okurek|okurky|zelenina|salat|paprika|mrkev|kvetak|brokolice|ovoce|avokado/.test(x)){
     return '🥦 Ovoce a zelenina';
   }
 
-  if(['ryze','testoviny','spagety','chleb','pecivo','rohlik','toast','tortilla','kuskus','brambor','vlocky'].some(k=>x.includes(k))){
+  if(/ryze|testoviny|spagety|chleb|pecivo|rohlik|toast|tortilla|kuskus|brambor|vlocky/.test(x)){
     return '🍚 Přílohy a pečivo';
   }
 
-  if(['protlak','fazole','cocka','hrach','kakao','orech','kokos','kari','soja','vyvar'].some(k=>x.includes(k))){
+  if(/protlak|fazole|cocka|hrach|kakao|orech|kokos|kari|soja|vyvar/.test(x)){
     return '🥫 Trvanlivé';
   }
 
