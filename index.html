@@ -49,23 +49,45 @@ body.home-active{background:#f7f1e5}
 .hs-mamdoma{left:3.5%;top:64.5%;width:46%;height:10.2%}
 .hs-nakup{left:50.2%;top:64.5%;width:46%;height:10.2%}
 .hs-jidla{left:3.5%;top:75.6%;width:46%;height:10.2%}
-.hs-jidla::after{
+.home-art::before{
   content:"185 jídel";
   position:absolute;
-  left:8%;
-  top:8%;
-  width:84%;
-  height:84%;
+  left:31%;
+  top:5.8%;
+  width:15%;
+  height:8%;
   display:flex;
   align-items:center;
   justify-content:center;
   box-sizing:border-box;
-  border-radius:12px;
-  background:rgba(255,253,246,.98);
+  border-radius:7px;
+  background:rgba(255,253,246,.97);
   color:#174f3d;
-  font-size:clamp(16px,3vw,30px);
+  font-size:clamp(13px,2.4vw,24px);
   font-weight:800;
   line-height:1.1;
+  text-align:center;
+  pointer-events:none;
+  z-index:6;
+}
+.hs-jidla::after{
+  content:"VŠECH 185 JÍDEL";
+  position:absolute;
+  left:25%;
+  top:43%;
+  width:55%;
+  height:52%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-sizing:border-box;
+  padding:4px;
+  border-radius:8px;
+  background:rgba(255,253,246,.95);
+  color:#174f3d;
+  font-size:clamp(12px,2.2vw,22px);
+  font-weight:800;
+  line-height:1.15;
   text-align:center;
   pointer-events:none;
   z-index:20;
