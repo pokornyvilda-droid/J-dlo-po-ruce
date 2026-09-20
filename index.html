@@ -887,11 +887,30 @@ function renderProfileGreeting(){
   function renderFavs(){
   const list=document.querySelector('#favList');
   if(!list)return;
+
   if(!S.favs.length){
     list.innerHTML='<div class="note">❤️ Zatím tu nemáš žádné oblíbené jídlo.<br>U jídla klepni na „Přidat do oblíbených“.</div>';
     return;
   }
-  list.innerHTML=S.favs.map(id=>card(id)).join('');
+
+  list.innerHTML=S.favs.map(id=>{
+    const m=meals[id];
+    if(!m)return '';
+    return '<div class="meal fav-item">'+
+      '<a href="#j'+id+'" style="flex:1"><div><h3>'+m[0]+'</h3><div class="meta">'+m[1]+' min</div></div></a>'+
+      '<button type="button" class="btn secondary fav-remove" data-fav-id="'+id+'">✕ Odebrat</button>'+
+    '</div>';
+  }).join('');
+
+  list.querySelectorAll('.fav-remove').forEach(btn=>{
+    btn.onclick=async()=>{
+      const id=Number(btn.dataset.favId);
+      S.favs=S.favs.filter(x=>x!==id);
+      renderFavs();
+      injectMealActions();
+      try{await save();}catch(e){console.warn('Oblíbené se nepodařilo uložit:',e);}
+    };
+  });
 }
 async function init(){
   await loadFromD1();
