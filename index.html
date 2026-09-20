@@ -914,8 +914,29 @@ function renderProfileGreeting(){
     .join('');
  }
 
+ function fixHomeNav(){
+  const art=document.querySelector('.home-art');
+  if(!art || art.dataset.navfixed)return;
+  art.dataset.navfixed='1';
+
+  art.addEventListener('click',function(e){
+    const rect=art.getBoundingClientRect();
+    const x=(e.clientX-rect.left)/rect.width*100;
+    const y=(e.clientY-rect.top)/rect.height*100;
+
+    if(y<68 || y>86)return;
+
+    if(x>=8 && x<27){e.preventDefault();e.stopPropagation();location.hash='';}
+    else if(x>=27 && x<44){e.preventDefault();e.stopPropagation();location.hash='#jidla';}
+    else if(x>=44 && x<61){e.preventDefault();e.stopPropagation();location.hash='#nakup';}
+    else if(x>=61 && x<78){e.preventDefault();e.stopPropagation();location.hash='#oblubene';}
+    else if(x>=78 && x<=92){e.preventDefault();e.stopPropagation();location.hash='#profil';}
+  },true);
+ }
+
   async function init(){
   await loadFromD1();
+  fixHomeNav();
 renderProfileGreeting();
   addFavPage();
   renderCart();
