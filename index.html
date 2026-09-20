@@ -990,24 +990,36 @@ function addCart(items){
   if(!S.cart.length){
     list.innerHTML='<div class="note">Nákup je zatím prázdný.<br>U jídla klepni na „Přidat suroviny do nákupu“.</div>';
   }else{
-    S.cart.forEach((c,i)=>{
-      const l=document.createElement('label');
+    const groups={};
+    S.cart.forEach(item=>(groups[groupFor(item.name)]??=[]).push(item));
 
-      l.className='row';
-      l.style.cssText='display:flex!important;align-items:center!important;gap:12px!important;margin:7px 0!important;padding:12px 14px!important;box-sizing:border-box!important;';
+    groupOrder.forEach(group=>{
+      if(!groups[group]?.length)return;
 
-      l.innerHTML=
-        `<input type="checkbox" ${c.checked?'checked':''} style="margin:0!important;flex:0 0 auto!important;width:18px!important;height:18px!important;">
-         <b style="flex:1!important;text-align:left!important;">${c.name}</b>
-         <span class="muted" style="margin-left:auto!important;white-space:nowrap!important;">×${c.qty||1}</span>`;
+      const h=document.createElement('h2');
+      h.textContent=group;
+      h.style.cssText='margin:18px 0 8px;font-size:18px;';
+      list.appendChild(h);
 
-      l.querySelector('input').onchange=e=>{
-        c.checked=e.target.checked;
-        save();
-        renderPlan();
-      };
+      groups[group].forEach(c=>{
+        const l=document.createElement('label');
 
-      list.appendChild(l);
+        l.className='row';
+        l.style.cssText='display:flex!important;align-items:center!important;gap:12px!important;margin:7px 0!important;padding:12px 14px!important;box-sizing:border-box!important;';
+
+        l.innerHTML=
+          `<input type="checkbox" ${c.checked?'checked':''} style="margin:0!important;flex:0 0 auto!important;width:18px!important;height:18px!important;">
+           <b style="flex:1!important;text-align:left!important;">${c.name}</b>
+           <span class="muted" style="margin-left:auto!important;white-space:nowrap!important;">×${c.qty||1}</span>`;
+
+        l.querySelector('input').onchange=e=>{
+          c.checked=e.target.checked;
+          save();
+          renderPlan();
+        };
+
+        list.appendChild(l);
+      });
     });
   }
 
