@@ -734,44 +734,49 @@ const save = async () => {
  function addCart(items){items.forEach(x=>{let n=x.trim(); if(!n)return; let found=S.cart.find(c=>c.name.toLowerCase()===n.toLowerCase()); if(found)found.qty++; else S.cart.push({name:n,qty:1,checked:false});});save();renderCart();}
  function renderCart(){let sec=document.querySelector('#nakup'); if(!sec)return; let box=sec.querySelector('.detail'); if(!box)return; box.innerHTML='<div id="cartList"></div><div class="action-row"><input id="newItem" placeholder="Přidat vlastní položku…"><button class="btn" id="addItem">＋ Přidat</button></div><a class="btn" href="#nakup-pomoc">🛒 Pomoz mi nakoupit</a>'; const list=box.querySelector('#cartList'); if(!S.cart.length) list.innerHTML='<div class="note">Nákup je zatím prázdný. Otevři detail jídla a klepni na „Přidat suroviny do nákupu“.</div>'; S.cart.forEach((c,i)=>{const l=document.createElement('label');l.className='row';l.innerHTML=`<input type="checkbox" ${c.checked?'checked':''}> ${c.name} <span class="muted">×${c.qty}</span>`;l.querySelector('input').onchange=e=>{c.checked=e.target.checked;save()};list.appendChild(l)}); box.querySelector('#addItem').onclick=()=>{let v=box.querySelector('#newItem').value;if(v){addCart([v]);box.querySelector('#newItem').value=''}}; }
  function injectMealActions(){
-  document.querySelectorAll('[id^="j"] .detail').forEach(d=>{
-    if(d.dataset.enhanced)return;
+  document.querySelectorAll('section[id^="j"] .detail').forEach(d=>{
+    const section=d.closest('section[id^="j"]');
+    if(!section || d.querySelector('.fav-action'))return;
 
-    let m=d.parentElement;
-    let id=+(m.id||'').slice(1);
+    const id=Number(section.id.slice(1));
     if(!id)return;
 
-    d.dataset.enhanced='1';
+    const row=document.createElement('div');
+    row.className='action-row fav-action';
+    row.style.cssText='margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;';
 
-    let row=document.createElement('div');
-    row.className='action-row';
-
-    let fav=document.createElement('button');
+    const fav=document.createElement('button');
+    fav.type='button';
     fav.className='btn fav';
 
-    const set=()=>{
+    const refresh=()=>{
       fav.textContent=S.favs.includes(id)
-        ?'❤️ V oblíbených'
-        :'♡ Přidat do oblíbených';
+        ? '❤️ V oblíbených'
+        : '♡ Přidat do oblíbených';
     };
 
-    set();
-
-    fav.onclick=()=>{
+    fav.onclick=async ()=>{
       S.favs=S.favs.includes(id)
-        ?S.favs.filter(x=>x!==id)
-        :[...S.favs,id];
+        ? S.favs.filter(x=>x!==id)
+        : [...S.favs,id];
 
-      save();
-      set();
+      refresh();
       renderFavs();
+
+      try{ await save(); }catch(e){ console.warn('Uložení oblíbeného jídla se nepodařilo:',e); }
     };
 
-    row.append(fav);
-    d.appendChild(row);
+    refresh();
+    row.appendChild(fav);
+
+    const cart=d.querySelector('a[href="#nakup"]');
+    if(cart && cart.parentNode){
+      cart.parentNode.insertBefore(row,cart.nextSibling);
+    }else{
+      d.appendChild(row);
+    }
   });
-}
- function card(id){let m=window.meals?.[id];return `<a class="meal" href="#j${id}"><div><h3>${m?m[0]:mealName(id)}</h3><div class="meta">${m?m[1]:''} min</div></div><span class="pill">Detail</span></a>`}
+} function card(id){let m=window.meals?.[id];return `<a class="meal" href="#j${id}"><div><h3>${m?m[0]:mealName(id)}</h3><div class="meta">${m?m[1]:''} min</div></div><span class="pill">Detail</span></a>`}
  function renderCustom(){let b=document.querySelector('#customList');if(!b)return;b.innerHTML=S.custom.length?S.custom.map((m,i)=>`<div class="meal"><div><h3>${m.name}</h3><div class="meta">${m.time} min · Moje jídlo</div><div class="muted">${m.ingredients}</div></div><button class="btn" data-ci="${i}">🛒 Do nákupu</button></div>`).join(''):'<div class="note">Tvoje vlastní jídla se objeví tady.</div>';b.querySelectorAll('[data-ci]').forEach(x=>x.onclick=()=>addCart(S.custom[+x.dataset.ci].ingredients.split(/[,;]+/)));}
  function imageDataUrl(file,max=1500,quality=.78){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>{const img=new Image();img.onload=()=>{const sc=Math.min(1,max/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);c.getContext('2d').drawImage(img,0,0,c.width,c.height);resolve(c.toDataURL('image/jpeg',quality));};img.onerror=reject;img.src=r.result};r.onerror=reject;r.readAsDataURL(file)})}
  async function callAI(endpoint,payload){const r=await fetch('https://j-dlo-po-ruce-ai.pokornyvilda.workers.dev/api/'+endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});let d={};try{d=await r.json()}catch{}if(!r.ok)throw new Error(d.error||d.message||'AI analýza se nepodařila.');function parseAny(x){if(typeof x!=='string')return x;let t=x.trim().replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'');try{return JSON.parse(t)}catch{return x}}function findUseful(x){x=parseAny(x);if(!x||typeof x!=='object')return null;if(Array.isArray(x.ingredients)||Array.isArray(x.uncertain)||Array.isArray(x.meals)||Array.isArray(x.calories)||Array.isArray(x.protein))return x;if(x.error||x.message)throw new Error(x.error||x.message);for(const k of ['result','response','data','output','output_text','content','text','value','body','message','choices','items']){const v=x[k];if(Array.isArray(v)){for(const item of v){const z=findUseful(item);if(z)return z}}else if(v&&typeof v==='object'||typeof v==='string'){const z=findUseful(v);if(z)return z}}for(const v of Object.values(x)){if(v&&typeof v==='object'||typeof v==='string'){const z=findUseful(v);if(z)return z}}return null}const out=findUseful(d);if(out)return out;throw new Error('AI vrátila nečekaný formát odpovědi.');}
