@@ -900,6 +900,20 @@ function renderProfileGreeting(){
 
   head.appendChild(box);
 }
+ function renderFavs(){
+  const list=document.querySelector('#favList');
+  if(!list)return;
+
+  if(!S.favs.length){
+    list.innerHTML='<div class="note">❤️ Zatím tu nemáš žádné oblíbené jídlo.<br>U jídla klepni na „Přidat do oblíbených“.</div>';
+    return;
+  }
+
+  list.innerHTML=S.favs
+    .map(id=>card(id))
+    .join('');
+ }
+
   async function init(){
   await loadFromD1();
 renderProfileGreeting();
