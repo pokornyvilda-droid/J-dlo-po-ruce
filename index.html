@@ -774,7 +774,20 @@ const save = async () => {
   const category=page.querySelector('#mealCategory');
   const count=page.querySelector('#mealSearchCount');
   if(!input||!category||!count)return;
+  const allItems=[...list.querySelectorAll('.meal')];
+  const seen=new Set();
+  allItems.forEach(item=>{
+    const href=item.getAttribute('href')||'';
+    if(seen.has(href)){
+      item.remove();
+    }else{
+      seen.add(href);
+    }
+  });
+
   const items=[...list.querySelectorAll('.meal')];
+  const heading=page.querySelector('h1');
+  if(heading)heading.textContent='🍲 Všech '+items.length+' jídel';
 
   const apply=()=>{
     const q=norm(input.value);
