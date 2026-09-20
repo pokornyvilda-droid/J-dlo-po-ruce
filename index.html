@@ -785,7 +785,23 @@ const save = async () => {
  function enhanceFood(){let fj=document.querySelector('#fotojidlo');if(!fj||fj.dataset.enhanced)return;fj.dataset.enhanced='1';let d=fj.querySelector('.detail');d.innerHTML=`<div class="photo-box"><div style="font-size:52px">📸</div><h2 style="margin:6px 0">Vyfoť svoje jídlo</h2><p class="muted">Vyfoť celý talíř shora nebo lehce zešikma.</p><input id="foodPhoto" type="file" accept="image/*" capture="environment"><div id="foodPreview"></div></div><div class="detail" style="margin-top:14px"><h2>🍽️ Jak velká je porce?</h2><div class="grid" id="portionChoices"><button class="choice portion" data-portion="small" type="button"><h3>🥗 Menší</h3><p class="muted">lehčí porce</p></button><button class="choice portion active" data-portion="normal" type="button"><h3>🍽️ Běžná</h3><p class="muted">standardní porce</p></button><button class="choice portion" data-portion="large" type="button"><h3>🍛 Větší</h3><p class="muted">větší porce</p></button></div></div><div id="foodResult" class="scan-result"><div class="note">Vyfoť jídlo a nech AI udělat orientační odhad.</div></div>`;let portion='normal',lastImage=null;fj.querySelectorAll('.portion').forEach(b=>b.onclick=()=>{fj.querySelectorAll('.portion').forEach(x=>x.classList.remove('active'));b.classList.add('active');portion=b.dataset.portion;if(lastImage)analyzeFood()});async function analyzeFood(){fj.querySelector('#foodResult').innerHTML='<div class="note">⏳ AI odhaduje jídlo a výživové hodnoty…</div>';try{const ai=await callAI('analyze-food',{image:lastImage,portion});const conf=ai.confidence==='high'?'vyšší':ai.confidence==='medium'?'střední':'nižší';fj.querySelector('#foodResult').innerHTML=`<div class="detail"><h2>🍽️ ${ai.meal||'Odhad jídla'}</h2><p class="muted">${ai.description||''}</p><div class="statgrid"><div class="row"><b>≈ ${ai.kcal??'—'} kcal</b><br><span class="muted">energie</span></div><div class="row"><b>≈ ${ai.protein_g??'—'} g</b><br><span class="muted">bílkoviny</span></div><div class="row"><b>≈ ${ai.carbs_g??'—'} g</b><br><span class="muted">sacharidy</span></div><div class="row"><b>≈ ${ai.fat_g??'—'} g</b><br><span class="muted">tuky</span></div><div class="row"><b>≈ ${ai.fiber_g??'—'} g</b><br><span class="muted">vláknina</span></div></div><div class="note">Přesnost odhadu: ${conf}. ${Array.isArray(ai.assumptions)&&ai.assumptions.length?'Předpoklady: '+ai.assumptions.join('; '):''}</div><button class="btn secondary" id="retakeFood" type="button">📸 Vyfotit znovu</button></div>`;fj.querySelector('#retakeFood').onclick=()=>{lastImage=null;fj.querySelector('#foodPhoto').value='';fj.querySelector('#foodPreview').innerHTML='';fj.querySelector('#foodResult').innerHTML='<div class="note">Vyfoť jídlo a nech AI udělat orientační odhad.</div>'}}catch(err){fj.querySelector('#foodResult').innerHTML='<div class="note">⚠️ '+err.message+'<br><small>Zkontroluj Cloudflare Secret OPENAI_API_KEY.</small></div>'}}fj.querySelector('#foodPhoto').onchange=async e=>{const file=e.target.files?.[0];if(!file)return;try{lastImage=await imageDataUrl(file);fj.querySelector('#foodPreview').innerHTML=`<img class="photo-preview" src="${lastImage}" alt="Vyfocené jídlo">`;analyzeFood()}catch(err){fj.querySelector('#foodResult').innerHTML='<div class="note">⚠️ Fotku se nepodařilo načíst.</div>'}}}
  function enhancePhotos(){enhanceFridge();enhanceFood()}
  function enhanceBottom(){let nav=document.querySelector('.bottom-inner');if(nav&&!nav.querySelector('[href="#oblubene"]')){let a=document.createElement('a');a.href='#oblubene';a.innerHTML='<b>❤️</b>Oblíbené';nav.insertBefore(a,nav.lastElementChild)}}
- function addFavPage(){if(document.querySelector('#oblubene'))return;let main=document.querySelector('main');let s=document.createElement('section');s.id='oblubene';s.className='page';s.innerHTML='<a class="btn secondary" href="#">← Domů</a><div class="hero"><h1>❤️ Oblíbená jídla</h1><p>Jídla, která chceš mít po ruce.</p></div><div id="favList" class="meal-list"></div>';main.appendChild(s)}
+ function syncDynamicPages(){
+  const hash=location.hash;
+  document.querySelectorAll('main .page').forEach(page=>{
+    page.style.display = (hash && '#'+page.id===hash) ? 'block' : 'none';
+  });
+}
+function addFavPage(){
+  let s=document.querySelector('#oblubene');
+  if(!s){
+    const main=document.querySelector('main');
+    s=document.createElement('section');
+    s.id='oblubene';
+    s.className='page';
+    s.innerHTML='<a class="btn secondary" href="#">← Domů</a><div class="hero"><h1>❤️ Oblíbená jídla</h1><p>Jídla, která chceš mít po ruce.</p></div><div id="favList" class="meal-list"></div>';
+    main.appendChild(s);
+  }
+}
  function enhanceHome(){let h=document.querySelector('.home');if(!h||h.dataset.enhanced)return;h.dataset.enhanced='1';}
  let d1Loaded=false;
 
@@ -1038,6 +1054,6 @@ function addCart(items){
  function renderPlan(){const p=document.querySelector('#planList');if(!p)return;const store=localStorage.getItem('rs_store')||'Vyber obchod';const t=document.querySelector('#storeTitle');if(t)t.textContent='🛒 '+store;const groups={};S.cart.forEach(c=>(groups[groupFor(c.name)]??=[]).push(c));p.innerHTML='';if(!S.cart.length){p.innerHTML='<div class="note">Seznam je prázdný.</div>';return;}groupOrder.forEach(g=>{if(!groups[g]?.length)return;const h=document.createElement('h2');h.textContent=g;p.appendChild(h);groups[g].forEach((c)=>{const l=document.createElement('label');l.className='row';l.innerHTML=`<input type="checkbox" ${c.checked?'checked':''}> ${c.name} <span class="muted">×${c.qty||1}</span>`;l.querySelector('input').onchange=e=>{c.checked=e.target.checked;save();renderCart();};p.appendChild(l);});});}
  document.querySelectorAll('.store-choice').forEach(a=>a.addEventListener('click',()=>{localStorage.setItem('rs_store',a.dataset.store);setTimeout(renderPlan,20);}));
 
- init();window.addEventListener('hashchange',()=>setTimeout(init,20));
+ init();syncDynamicPages();window.addEventListener('hashchange',()=>{syncHome();syncDynamicPages();setTimeout(init,20)});
 })();
 </script></body></html>
