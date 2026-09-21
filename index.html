@@ -845,6 +845,7 @@ const save = async () => {
 function enhanceMealSearch(){
   const page=document.querySelector('#jidla');
   if(!page||page.dataset.searchEnhanced)return;
+
   const list=page.querySelector('.meal-list');
   if(!list)return;
 
@@ -854,18 +855,35 @@ function enhanceMealSearch(){
   const category=page.querySelector('#mealCategory');
   const count=page.querySelector('#mealSearchCount');
   if(!input||!category||!count)return;
-  const allItems=[...list.querySelectorAll('.meal')];
-  const seen=new Set();
-  allItems.forEach(item=>{
-    const href=item.getAttribute('href')||'';
-    if(seen.has(href)){
-      item.remove();
-    }else{
-      seen.add(href);
-    }
-  });
 
-  const items=[...list.querySelectorAll('.meal')];
+  // Seznam skládáme přímo z detailů j1–j185, takže je vždy
+  // shodný s reálnou databází jídel a nemůže se rozjet o statický seznam.
+  const items=[];
+  const cats=new Set();
+
+  for(let id=1;id<=185;id++){
+    const sec=document.querySelector('#j'+id);
+    if(!sec)continue;
+
+    const title=sec.querySelector('h1')?.textContent?.replace(/^\\d+\\.\\s*/,'').trim();
+    const meta=sec.querySelector('.pill')?.textContent?.trim()||'';
+    if(!title)continue;
+
+    const cat=meta.split('·')[0].trim();
+    if(cat)cats.add(cat);
+
+    const item=document.createElement('a');
+    item.className='meal';
+    item.href='#j'+id;
+    item.innerHTML='<div><h3>'+id+'. '+title+'</h3><div class="meta">'+meta+'</div></div><span class="pill">Detail</span>';
+    items.push(item);
+  }
+
+  list.replaceChildren(...items);
+
+  category.innerHTML='<option value="">🍽️ Všechny kategorie</option>'+
+    [...cats].sort((a,b)=>a.localeCompare(b,'cs')).map(cat=>'<option>'+cat+'</option>').join('');
+
   const heading=page.querySelector('h1');
   if(heading)heading.textContent='🍲 Všech '+items.length+' jídel';
 
