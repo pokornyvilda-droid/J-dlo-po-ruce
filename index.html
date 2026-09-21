@@ -1036,16 +1036,26 @@ function renderProfileGreeting(){
   const list=document.querySelector('#favList');
   if(!list)return;
 
-  if(!S.favs.length){
+  const ids=[...new Set((S.favs||[]).map(Number))]
+    .filter(id=>id>=1&&id<=185&&document.querySelector('#j'+id));
+
+  // Uložené ID, které už neexistuje, ti nezůstane viset v seznamu.
+  if(ids.length!==(S.favs||[]).length){
+    S.favs=ids;
+  }
+
+  if(!ids.length){
     list.innerHTML='<div class="note">❤️ Zatím tu nemáš žádné oblíbené jídlo.<br>U jídla klepni na „Přidat do oblíbených“.</div>';
     return;
   }
 
-  list.innerHTML=S.favs.map(id=>{
-    const m=meals[id];
-    if(!m)return '';
+  list.innerHTML=ids.map(id=>{
+    const sec=document.querySelector('#j'+id);
+    const title=sec?.querySelector('h1')?.textContent?.replace(/^\\d+\\.\\s*/,'').trim()||mealName(id);
+    const meta=sec?.querySelector('.pill')?.textContent?.trim()||((window.meals?.[id]?.[1]||'')+' min');
+
     return '<div class="meal fav-item">'+
-      '<a href="#j'+id+'" style="flex:1"><div><h3>'+m[0]+'</h3><div class="meta">'+m[1]+' min</div></div></a>'+
+      '<a href="#j'+id+'" style="flex:1"><div><h3>'+title+'</h3><div class="meta">'+meta+'</div></div></a>'+
       '<button type="button" class="btn secondary fav-remove" data-fav-id="'+id+'">✕ Odebrat</button>'+
     '</div>';
   }).join('');
@@ -1060,6 +1070,7 @@ function renderProfileGreeting(){
     };
   });
 }
+
 async function init(){
   await loadFromD1();
 renderProfileGreeting();
