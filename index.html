@@ -1328,7 +1328,41 @@ function addCart(items){
 
   return '🧂 Ostatní';
 }
- function renderPlan(){const p=document.querySelector('#planList');if(!p)return;const store=localStorage.getItem('rs_store')||'Vyber obchod';const t=document.querySelector('#storeTitle');if(t)t.textContent='🛒 '+store;const groups={};S.cart.forEach(c=>(groups[groupFor(c.name)]??=[]).push(c));p.innerHTML='';if(!S.cart.length){p.innerHTML='<div class="note">Seznam je prázdný.</div>';return;}groupOrder.forEach(g=>{if(!groups[g]?.length)return;const h=document.createElement('h2');h.textContent=g;p.appendChild(h);groups[g].forEach((c)=>{const l=document.createElement('label');l.className='row';l.innerHTML=`<input type="checkbox" ${c.checked?'checked':''}> ${c.name} <span class="muted">×${c.qty||1}</span>`;l.querySelector('input').onchange=e=>{c.checked=e.target.checked;save();renderCart();};p.appendChild(l);});});}
+ function renderPlan(){
+  const p=document.querySelector('#planList');
+  if(!p)return;
+  const store=localStorage.getItem('rs_store')||'Vyber obchod';
+  const title=document.querySelector('#storeTitle');
+  if(title)title.textContent='🛒 '+store;
+
+  const groups={};
+  S.cart.forEach(c=>(groups[cartCategory(c.name)]??=[]).push(c));
+  p.innerHTML='';
+
+  if(!S.cart.length){
+    p.innerHTML='<div class="note">Seznam je prázdný.</div>';
+    return;
+  }
+
+  ['🥩 Maso a uzeniny','🥛 Mléčné a vejce','🥦 Ovoce a zelenina','🍚 Přílohy a pečivo','🥫 Trvanlivé','🧂 Ostatní'].forEach(group=>{
+    if(!groups[group]?.length)return;
+    const h=document.createElement('h2');
+    h.textContent=group;
+    p.appendChild(h);
+    groups[group].forEach(c=>{
+      const l=document.createElement('label');
+      l.className='row';
+      l.innerHTML='<input type="checkbox" '+(c.checked?'checked':'')+'> '+c.name+' <span class="muted">×'+(c.qty||1)+'</span>';
+      l.querySelector('input').onchange=async e=>{
+        c.checked=e.target.checked;
+        try{await save();}catch(err){console.warn('Nákup se nepodařilo uložit:',err);}
+        renderPlan();
+      };
+      p.appendChild(l);
+    });
+  });
+}
+
  document.querySelectorAll('.store-choice').forEach(a=>a.addEventListener('click',()=>{localStorage.setItem('rs_store',a.dataset.store);setTimeout(renderPlan,20);}));
 
  init();window.addEventListener('hashchange',()=>setTimeout(init,20));
