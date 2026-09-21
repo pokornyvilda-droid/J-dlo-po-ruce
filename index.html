@@ -857,17 +857,15 @@ function injectMealActions(){
     const id=Number(section.id.slice(1));
     if(!id)return;
 
-    // Nákup vždy bere skutečné suroviny z detailu receptu.
-    // Tím pádem funguje stejně pro všech 185 jídel a není závislý
-    // na staré pomocné tabulce ingredients.
-    const cart=d.querySelector('a[href="#nakup"]');
+    const cart=d.querySelector('a[href="#nakup"],button[onclick*="ingredients["]');
     if(cart&&!cart.dataset.shoppingEnhanced){
       cart.dataset.shoppingEnhanced='1';
       cart.addEventListener('click',e=>{
         e.preventDefault();
+        e.stopImmediatePropagation();
         addCart(getMealIngredients(id));
         location.hash='nakup';
-      });
+      },true);
     }
 
     if(d.querySelector('.fav-action'))return;
@@ -888,8 +886,7 @@ function injectMealActions(){
     else d.appendChild(row);
   });
 }
-
- function card(id){let m=window.meals?.[id];return `<a class="meal" href="#j${id}"><div><h3>${m?m[0]:mealName(id)}</h3><div class="meta">${m?m[1]:''} min</div></div><span class="pill">Detail</span></a>`}
+function card(id){let m=window.meals?.[id];return `<a class="meal" href="#j${id}"><div><h3>${m?m[0]:mealName(id)}</h3><div class="meta">${m?m[1]:''} min</div></div><span class="pill">Detail</span></a>`}
  function renderCustom(){
   let b=document.querySelector('#customList');
   if(!b)return;
