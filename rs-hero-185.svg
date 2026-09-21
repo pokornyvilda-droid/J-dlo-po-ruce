@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="850" height="1850" viewBox="0 0 850 1850">
   <image href="rs-hero.png?raw=1" x="0" y="0" width="850" height="1850" preserveAspectRatio="none"/>
-  <!-- změna pouze čísla 60 -> 185; původní rozvržení zůstává -->
-  <rect x="286" y="817" width="31" height="22" fill="#ede6d5"/>
-  <text x="279" y="836" font-family="DejaVu Sans, Arial, sans-serif" font-size="17" font-weight="700" fill="#184f3d">185</text>
-  <rect x="232" y="1452" width="40" height="28" fill="#f2eee2"/>
-  <text x="233" y="1475" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#184f3d">185</text>
+  <!-- pouze původní číslice 60 jsou zakryté a nahrazené 185; zbytek grafiky zůstává beze změny -->
+  <rect x="391" y="164" width="49" height="39" fill="#f4f0e5"/>
+  <text x="397" y="193" font-family="Arial, sans-serif" font-size="27" font-weight="700" fill="#174f3d">185</text>
+  <rect x="324" y="1240" width="62" height="48" fill="#f2eee2"/>
+  <text x="327" y="1278" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#174f3d">185</text>
 </svg>
