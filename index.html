@@ -634,8 +634,11 @@ function renderRecs(){
 
   const effectiveNeed=state.need||profile.preference||'normal';
 
-  let pool=pools[state.place]||Object.keys(meals).map(Number);
-  let exact=pool.filter(id=>{
+  // Všech 185 jídel je kandidátem. Kontext z původních poolů pouze
+  // zvýhodní vhodná jídla, ale už neblokuje novější jídla 61–185.
+  const allIds=Object.keys(meals).map(Number);
+  const preferred=new Set(pools[state.place]||[]);
+  const candidates=allIds.filter(id=>{
     const m=meals[id];
     if(!m)return false;
     if(state.time==='10'&&m[1]>10)return false;
@@ -645,18 +648,12 @@ function renderRecs(){
     return true;
   });
 
-  let fallback=Object.keys(meals).map(Number).filter(id=>{
-    const m=meals[id];
-    if(!m)return false;
-    if(state.time==='10'&&m[1]>10)return false;
-    if(state.time==='30'&&m[1]>30)return false;
-    if(effectiveNeed==='protein'&&m[2]!=='protein')return false;
-    if(effectiveNeed==='light'&&m[2]!=='light')return false;
-    return true;
+  const ids=candidates.sort((a,b)=>{
+    const ap=preferred.has(a)?1:0;
+    const bp=preferred.has(b)?1:0;
+    if(ap!==bp)return bp-ap;
+    return a-b;
   });
-
-  let ids=[...new Set([...exact,...fallback])];
-  if(!ids.length)ids=pool;
 
   let seed=(state.place||'').length*7+(state.time||'').length*11+(effectiveNeed||'').length*13;
   let rotated=ids.map((_,i)=>ids[(i+seed)%ids.length]);
