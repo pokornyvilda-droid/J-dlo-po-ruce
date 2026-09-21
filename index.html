@@ -745,12 +745,38 @@ const save = async () => {
  function mealName(id){return window.meals?.[id]?.[0] || document.querySelector('#j'+id+' h1')?.textContent?.replace(/^\d+\.\s*/,'') || ('Jídlo '+id)}
  function addCart(items){items.forEach(x=>{let n=x.trim(); if(!n)return; let found=S.cart.find(c=>c.name.toLowerCase()===n.toLowerCase()); if(found)found.qty++; else S.cart.push({name:n,qty:1,checked:false});});save();renderCart();}
  function renderCart(){let sec=document.querySelector('#nakup'); if(!sec)return; let box=sec.querySelector('.detail'); if(!box)return; box.innerHTML='<div id="cartList"></div><div class="action-row"><input id="newItem" placeholder="Přidat vlastní položku…"><button class="btn" id="addItem">＋ Přidat</button></div><a class="btn" href="#nakup-pomoc">🛒 Pomoz mi nakoupit</a>'; const list=box.querySelector('#cartList'); if(!S.cart.length) list.innerHTML='<div class="note">Nákup je zatím prázdný. Otevři detail jídla a klepni na „Přidat suroviny do nákupu“.</div>'; S.cart.forEach((c,i)=>{const l=document.createElement('label');l.className='row';l.innerHTML=`<input type="checkbox" ${c.checked?'checked':''}> ${c.name} <span class="muted">×${c.qty}</span>`;l.querySelector('input').onchange=e=>{c.checked=e.target.checked;save()};list.appendChild(l)}); box.querySelector('#addItem').onclick=()=>{let v=box.querySelector('#newItem').value;if(v){addCart([v]);box.querySelector('#newItem').value=''}}; }
- function injectMealActions(){
+ function getMealIngredients(id){
+  const section=document.querySelector('#j'+id);
+  if(!section)return [];
+  const headings=[...section.querySelectorAll('h2')];
+  const heading=headings.find(h=>norm(h.textContent).includes('suroviny'));
+  const p=heading?.nextElementSibling;
+  if(!p)return [];
+  return p.textContent.split(/[,;]+/)
+    .map(x=>x.trim())
+    .filter(Boolean);
+}
+function injectMealActions(){
   document.querySelectorAll('section[id^="j"] .detail').forEach(d=>{
     const section=d.closest('section[id^="j"]');
-    if(!section || d.querySelector('.fav-action'))return;
+    if(!section)return;
     const id=Number(section.id.slice(1));
     if(!id)return;
+
+    // Nákup vždy bere skutečné suroviny z detailu receptu.
+    // Tím pádem funguje stejně pro všech 185 jídel a není závislý
+    // na staré pomocné tabulce ingredients.
+    const cart=d.querySelector('a[href="#nakup"]');
+    if(cart&&!cart.dataset.shoppingEnhanced){
+      cart.dataset.shoppingEnhanced='1';
+      cart.addEventListener('click',e=>{
+        e.preventDefault();
+        addCart(getMealIngredients(id));
+        location.hash='nakup';
+      });
+    }
+
+    if(d.querySelector('.fav-action'))return;
     const row=document.createElement('div');
     row.className='action-row fav-action';
     const fav=document.createElement('button');
@@ -762,11 +788,13 @@ const save = async () => {
       refresh(); renderFavs();
       try{await save();}catch(e){console.warn('Oblíbené se nepodařilo uložit:',e);}
     };
-    refresh(); row.appendChild(fav);
-    const cart=d.querySelector('a[href="#nakup"]');
-    if(cart) cart.parentNode.insertBefore(row,cart.nextSibling); else d.appendChild(row);
+    refresh();
+    row.appendChild(fav);
+    if(cart) cart.parentNode.insertBefore(row,cart.nextSibling);
+    else d.appendChild(row);
   });
 }
+
  function card(id){let m=window.meals?.[id];return `<a class="meal" href="#j${id}"><div><h3>${m?m[0]:mealName(id)}</h3><div class="meta">${m?m[1]:''} min</div></div><span class="pill">Detail</span></a>`}
  function renderCustom(){
   let b=document.querySelector('#customList');
