@@ -13,7 +13,7 @@ export default {
     // Domovský vizuál je uložen v assetu rs-hero-185.svg.
     if (url.pathname === "/rs-hero.png" && !url.searchParams.has("raw")) {
       const assetUrl = new URL("/rs-hero-185.svg", request.url);
-      return env.ASSETS.fetch(new Request(assetUrl, request));
+      return new Response(await (await env.ASSETS.fetch(new Request(assetUrl, request))).arrayBuffer(), {status:200, headers:{"Content-Type":"image/svg+xml; charset=utf-8","Cache-Control":"no-store, no-cache, must-revalidate, max-age=0"}});
     }
 
     // Při servírování indexu odstraníme pouze staré HTML textové záplaty,
