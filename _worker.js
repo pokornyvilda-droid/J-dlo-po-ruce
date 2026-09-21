@@ -10,8 +10,7 @@ export default {
         }
       });
 
-    // Opravený domovský vizuál: starý PNG zůstává jako zdroj,
-    // ale pro uživatele servírujeme asset s korektním počtem 185 jídel.
+    // Domovský vizuál je uložen v assetu rs-hero-185.svg.
     if (url.pathname === "/rs-hero.png" && !url.searchParams.has("raw")) {
       const assetUrl = new URL("/rs-hero-185.svg", request.url);
       return env.ASSETS.fetch(new Request(assetUrl, request));
