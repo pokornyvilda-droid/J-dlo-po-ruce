@@ -22,7 +22,7 @@ export default {
     if (url.pathname === "/" || url.pathname === "/index.html") {
       const response = await env.ASSETS.fetch(request);
       const html = await response.text();
-      const cleaned = html.replace(/<span class="count-fix[^>]*>[^<]*<\\/span>/g, "");
+      const cleaned = html.replace(/<span class="count-fix[^>]*>[^<]*<\/span>/g, "");
       return new Response(cleaned, {
         status: response.status,
         headers: response.headers
