@@ -22,7 +22,47 @@ export default {
     if (url.pathname === "/" || url.pathname === "/index.html") {
       const response = await env.ASSETS.fetch(request);
       const html = await response.text();
-      const cleaned = html.replace(/<span class="count-fix[^>]*>[^<]*<\/span>/g, "").replaceAll('href="#oblibene"', 'href="#oblubene"');
+      const cleaned = html.replace(/<span class="count-fix[^>]*>[^<]*<\\/span>/g, "").replaceAll('href="#oblibene"', 'href="#oblubene"')
+        .replace(
+          'window.meals=meals;',
+          `window.meals=meals;
+for(let i=1;i<=185;i++){
+  if(window.meals[i])continue;
+  const sec=document.getElementById('j'+i);
+  if(!sec)continue;
+  const title=sec.querySelector('h1')?.textContent?.replace(/^\\d+\\.\\s*/,'').trim()||('Jídlo '+i);
+  const pill=sec.querySelector('.pill')?.textContent||'';
+  const tm=pill.match(/(\\d+)\\s*min/);
+  window.meals[i]=[title,tm?Number(tm[1]):99,'normal','doma'];
+}`
+        )
+        .replace(
+          'init();window.addEventListener',
+          `const originalRenderFavs=renderFavs;
+function renderFavs(){
+  const list=document.querySelector('#favList');
+  if(!list)return;
+  if(!S.favs.length){
+    list.innerHTML='<div class="note">❤️ Zatím tu nemáš žádné oblíbené jídlo.<br>U jídla klepni na „Přidat do oblíbených“.</div>';
+    return;
+  }
+  list.innerHTML=S.favs.map(id=>{
+    const m=window.meals[id];
+    if(!m)return '';
+    return '<div class="meal fav-item"><a href="#j'+id+'" style="flex:1"><div><h3>'+m[0]+'</h3><div class="meta">'+(m[1]||'')+' min</div></div></a><button type="button" class="btn secondary fav-remove" data-fav-id="'+id+'">✕ Odebrat</button></div>';
+  }).join('');
+  list.querySelectorAll('.fav-remove').forEach(btn=>{
+    btn.onclick=async()=>{
+      const id=Number(btn.dataset.favId);
+      S.favs=S.favs.filter(x=>x!==id);
+      renderFavs();
+      injectMealActions();
+      try{await save();}catch(e){console.warn('Oblíbené se nepodařilo uložit:',e);}
+    };
+  });
+}
+init();window.addEventListener`
+        );
       return new Response(cleaned, {
         status: response.status,
         headers: response.headers
