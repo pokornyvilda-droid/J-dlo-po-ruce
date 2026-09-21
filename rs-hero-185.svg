@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="850" height="1850" viewBox="0 0 850 1850">
-  <image href="rs-hero.png?raw=1" x="0" y="0" width="850" height="1850" preserveAspectRatio="none"/>
+  <image href="https://raw.githubusercontent.com/pokornyvilda-droid/J-dlo-po-ruce/main/rs-hero.png" x="0" y="0" width="850" height="1850" preserveAspectRatio="none"/>
   <!-- Horní původní „60“: překryjeme pouze číslice, „jídel“ zůstává původní. -->
   <rect x="390" y="202" width="100" height="55" fill="#f1ede4"/>
   <text x="440" y="242" text-anchor="middle" font-family="Arial, sans-serif" font-size="29" font-weight="700" fill="#174f3d">185</text>
