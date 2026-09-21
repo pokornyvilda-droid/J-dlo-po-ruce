@@ -10,6 +10,25 @@ export default {
         }
       });
 
+    // Opravený domovský vizuál: starý PNG zůstává jako zdroj,
+    // ale pro uživatele servírujeme asset s korektním počtem 185 jídel.
+    if (url.pathname === "/rs-hero.png") {
+      const assetUrl = new URL("/rs-hero-185.svg", request.url);
+      return env.ASSETS.fetch(new Request(assetUrl, request));
+    }
+
+    // Při servírování indexu odstraníme pouze staré HTML textové záplaty,
+    // aby se přes nový vizuál nevykreslovaly bílé obdélníky.
+    if (url.pathname === "/" || url.pathname === "/index.html") {
+      const response = await env.ASSETS.fetch(request);
+      const html = await response.text();
+      const cleaned = html.replace(/<span class="count-fix[^>]*>[^<]*<\\/span>/g, "");
+      return new Response(cleaned, {
+        status: response.status,
+        headers: response.headers
+      });
+    }
+
     // Načtení uživatele
     if (url.pathname === "/api/user" && request.method === "GET") {
       const id = url.searchParams.get("id");
