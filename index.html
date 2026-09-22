@@ -919,11 +919,33 @@ function card(id){let m=window.meals?.[id];return `<a class="meal" href="#j${id}
 const out=fd.querySelector('#fridgeResult');if(!selected.length){out.innerHTML='<div class="note">Vyber aspoň jednu surovinu.</div>';return}out.innerHTML=ranked.length?`<div class="detail"><h2>🍲 Co z toho můžeš udělat</h2><p class="muted">Nejdřív ukazuji jídla, která využijí nejvíc z toho, co máš.</p><div class="meal-list">${ranked.map(r=>`<a class="meal" href="#j${r.id}"><div><h3>${mealName(r.id)}</h3><div class="meta">${r.hit} společné ${r.hit===1?'surovina':'suroviny'}</div></div><span class="pill">Detail</span></a>`).join('')}</div></div>`:'<div class="note">Z těchto surovin zatím nemám vhodný recept.</div>'};}catch(err){fd.querySelector('#fridgePreview').innerHTML='<div class="note">⚠️ '+err.message+'<br><small>Pokud AI ještě není nastavená, zkontroluj Cloudflare Secret OPENAI_API_KEY.</small></div>'}}}
  function enhanceFood(){let fj=document.querySelector('#fotojidlo');if(!fj||fj.dataset.enhanced)return;fj.dataset.enhanced='1';let d=fj.querySelector('.detail');d.innerHTML=`<div class="photo-box"><div style="font-size:52px">📸</div><h2 style="margin:6px 0">Vyfoť svoje jídlo</h2><p class="muted">Vyfoť celý talíř shora nebo lehce zešikma.</p><input id="foodPhoto" type="file" accept="image/*" capture="environment"><div id="foodPreview"></div></div><div class="detail" style="margin-top:14px"><h2>🍽️ Jak velká je porce?</h2><div class="grid" id="portionChoices"><button class="choice portion" data-portion="small" type="button"><h3>🥗 Menší</h3><p class="muted">lehčí porce</p></button><button class="choice portion active" data-portion="normal" type="button"><h3>🍽️ Běžná</h3><p class="muted">standardní porce</p></button><button class="choice portion" data-portion="large" type="button"><h3>🍛 Větší</h3><p class="muted">větší porce</p></button></div></div><div id="foodResult" class="scan-result"><div class="note">Vyfoť jídlo a nech AI udělat orientační odhad.</div></div>`;let portion='normal',lastImage=null;fj.querySelectorAll('.portion').forEach(b=>b.onclick=()=>{fj.querySelectorAll('.portion').forEach(x=>x.classList.remove('active'));b.classList.add('active');portion=b.dataset.portion;if(lastImage)analyzeFood()});async function analyzeFood(){fj.querySelector('#foodResult').innerHTML='<div class="note">⏳ AI odhaduje jídlo a výživové hodnoty…</div>';try{const ai=await callAI('analyze-food',{image:lastImage,portion});const conf=ai.confidence==='high'?'vyšší':ai.confidence==='medium'?'střední':'nižší';fj.querySelector('#foodResult').innerHTML=`<div class="detail"><h2>🍽️ ${ai.meal||'Odhad jídla'}</h2><p class="muted">${ai.description||''}</p><div class="statgrid"><div class="row"><b>≈ ${ai.kcal??'—'} kcal</b><br><span class="muted">energie</span></div><div class="row"><b>≈ ${ai.protein_g??'—'} g</b><br><span class="muted">bílkoviny</span></div><div class="row"><b>≈ ${ai.carbs_g??'—'} g</b><br><span class="muted">sacharidy</span></div><div class="row"><b>≈ ${ai.fat_g??'—'} g</b><br><span class="muted">tuky</span></div><div class="row"><b>≈ ${ai.fiber_g??'—'} g</b><br><span class="muted">vláknina</span></div></div><div class="note">Přesnost odhadu: ${conf}. ${Array.isArray(ai.assumptions)&&ai.assumptions.length?'Předpoklady: '+ai.assumptions.join('; '):''}</div><button class="btn secondary" id="retakeFood" type="button">📸 Vyfotit znovu</button></div>`;fj.querySelector('#retakeFood').onclick=()=>{lastImage=null;fj.querySelector('#foodPhoto').value='';fj.querySelector('#foodPreview').innerHTML='';fj.querySelector('#foodResult').innerHTML='<div class="note">Vyfoť jídlo a nech AI udělat orientační odhad.</div>'}}catch(err){fj.querySelector('#foodResult').innerHTML='<div class="note">⚠️ '+err.message+'<br><small>Zkontroluj Cloudflare Secret OPENAI_API_KEY.</small></div>'}}fj.querySelector('#foodPhoto').onchange=async e=>{const file=e.target.files?.[0];if(!file)return;try{lastImage=await imageDataUrl(file);fj.querySelector('#foodPreview').innerHTML=`<img class="photo-preview" src="${lastImage}" alt="Vyfocené jídlo">`;analyzeFood()}catch(err){fj.querySelector('#foodResult').innerHTML='<div class="note">⚠️ Fotku se nepodařilo načíst.</div>'}}}
  function enhancePhotos(){enhanceFridge();enhanceFood()}
- function rankMealsByIngredients(selected){
+ function ingredientMatches(selected,ingredient){
+  const s=norm(selected);
+  const a=norm(ingredient);
+  const aliases={
+    'kure':['kure','kureci'],
+    'kureci maso':['kure','kureci'],
+    'veprove maso':['vepro','veprove'],
+    'hovezi maso':['hove','hovezi'],
+    'brambory':['brambor'],
+    'rajcata':['rajce','rajcata','rajcat'],
+    'okurka':['okurek','okurky','okur'],
+    'cibule':['cibul'],
+    'cesnek':['cesnek'],
+    'syr':['syr'],
+    'vejce':['vejce','vajec'],
+    'tunak':['tunak'],
+    'smetana':['smetan']
+  };
+  const terms=aliases[s]||[s];
+  return terms.some(t=>a.includes(t)||t.includes(a));
+}
+
+function rankMealsByIngredients(selected){
   const chosen=selected.map(norm).filter(Boolean);
   return Array.from({length:185},(_,i)=>i+1).map(id=>{
     const arr=getMealIngredients(id);
-    const hit=chosen.filter(x=>arr.some(a=>norm(a).includes(x)||x.includes(norm(a)))).length;
+    const hit=chosen.filter(x=>arr.some(a=>ingredientMatches(x,a))).length;
     return {id,hit};
   }).filter(x=>x.hit>0).sort((a,b)=>b.hit-a.hit||a.id-b.id).slice(0,8);
 }
