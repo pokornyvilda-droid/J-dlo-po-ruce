@@ -115,6 +115,11 @@ a{
 a:hover{
   opacity:.8;
 }
+/* ===== MODERNÍ KATEGORIE JÍDEL ===== */
+.meal-categories{display:flex;flex-wrap:wrap;gap:9px;margin:12px 0 18px}
+.meal-cat{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:rgba(255,253,249,.9);color:var(--green);border-radius:999px;padding:9px 13px;font-weight:800;font-size:13px;cursor:pointer;box-shadow:0 5px 15px rgba(24,52,43,.06)}
+.meal-cat.active{background:var(--green);color:#fff;border-color:var(--green)}
+
 /* ===== MODERNÍ SPODNÍ NAVIGACE ===== */
 
 .bottom{
@@ -1045,6 +1050,24 @@ function enhanceMealSearch(){
   const count=page.querySelector('#mealSearchCount');
   if(!input||!category||!count)return;
 
+  const categoryIcons={
+    'Česká kuchyně':'🇨🇿',
+    'Fitness':'💪',
+    'Rychlé':'⚡',
+    'Snídaně':'🍳',
+    'Polévky':'🍲',
+    'Běžná jídla':'🍝',
+    'Sladká jídla':'🍰'
+  };
+  const categoryBar=document.createElement('div');
+  categoryBar.className='meal-categories';
+  categoryBar.innerHTML='<button type="button" class="meal-cat active" data-cat="">🍽️ Všechna</button>'+
+    [...cats].sort((a,b)=>a.localeCompare(b,'cs')).map(cat=>
+      '<button type="button" class="meal-cat" data-cat="'+cat.replace(/"/g,'&quot;')+'">'+
+      (categoryIcons[cat]||'🍴')+' '+cat+'</button>'
+    ).join('');
+  category.replaceWith(categoryBar);
+
   // Seznam skládáme přímo z detailů j1–j185, takže je vždy
   // shodný s reálnou databází jídel a nemůže se rozjet o statický seznam.
   const items=[];
@@ -1078,7 +1101,7 @@ function enhanceMealSearch(){
 
   const apply=()=>{
     const q=norm(input.value);
-    const cat=norm(category.value);
+    const cat=norm(categoryBar.querySelector('.meal-cat.active')?.dataset.cat||'');
     let visible=0;
 
     items.forEach(item=>{
@@ -1095,7 +1118,13 @@ function enhanceMealSearch(){
   };
 
   input.addEventListener('input',apply);
-  category.addEventListener('change',apply);
+  categoryBar.querySelectorAll('.meal-cat').forEach(button=>{
+    button.addEventListener('click',()=>{
+      categoryBar.querySelectorAll('.meal-cat').forEach(x=>x.classList.remove('active'));
+      button.classList.add('active');
+      apply();
+    });
+  });
   apply();
 }
 
