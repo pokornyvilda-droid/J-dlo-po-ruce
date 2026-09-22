@@ -1107,7 +1107,7 @@ function enhanceMealSearch(){
     const sec=document.querySelector('#j'+id);
     if(!sec)continue;
 
-    const title=sec.querySelector('h1')?.textContent?.replace(/^\\d+\\.\\s*/,'').trim();
+    const title=sec.querySelector('h1')?.textContent?.replace(/^\d+\.\s*/,'').trim();
     const meta=sec.querySelector('.pill')?.textContent?.trim()||'';
     if(!title)continue;
 
