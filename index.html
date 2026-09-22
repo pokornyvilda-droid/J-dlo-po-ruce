@@ -1219,30 +1219,47 @@ renderProfileGreeting();
     };
   }
 }
- // Vylepšený nákupní pomocník
- const oldAddCart=addCart;
 
+// NÁKUPNÍ POMOCNÍK — jedna společná implementace
 function norm(s){
   return String(s||'').toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+}
+
+const groupOrder=['🥩 Maso a uzeniny','🥛 Mléčné a vejce','🥦 Ovoce a zelenina','🍚 Přílohy a pečivo','🥫 Trvanlivé','🧂 Ostatní'];
+
+function groupFor(name){
+  const x=norm(name);
+  if(/maso|kure|kureci|veprove|vepro|hovezi|hove|mlete|tunak|sunka|parek|klobasa/.test(x)){
+    return '🥩 Maso a uzeniny';
+  }
+  if(/vejce|skyr|cottage|tvaroh|jogurt|smetana|mleko|maslo|syr|mozzarella/.test(x)){
+    return '🥛 Mléčné a vejce';
+  }
+  if(/banan|jablko|rajce|rajcata|okurek|okurky|zelenina|salat|paprika|mrkev|kvetak|brokolice|ovoce|avokado|cibule|cesnek/.test(x)){
+    return '🥦 Ovoce a zelenina';
+  }
+  if(/ryze|testoviny|spagety|chleb|pecivo|rohlik|toast|tortilla|kuskus|brambor|vlocky|nudle|mouka|strouhanka/.test(x)){
+    return '🍚 Přílohy a pečivo';
+  }
+  if(/protlak|fazole|cocka|hrach|kakao|orech|kokos|kari|soja|vyvar|med|ocet|koreni/.test(x)){
+    return '🥫 Trvanlivé';
+  }
+  return '🧂 Ostatní';
 }
 
 function addCart(items){
   const people=Math.max(1,Number(S.profile?.people)||1);
 
-  items.forEach(x=>{
-    const n=String(x||'').trim();
-    if(!n)return;
+  items.forEach(value=>{
+    const name=String(value||'').trim();
+    if(!name)return;
 
-    let f=S.cart.find(c=>norm(c.name)===norm(n));
-
-    if(f){
-      f.qty=(f.qty||1)+people;
+    const existing=S.cart.find(c=>norm(c.name)===norm(name));
+    if(existing){
+      existing.qty=(Number(existing.qty)||1)+people;
+      existing.checked=false;
     }else{
-      S.cart.push({
-        name:n,
-        qty:people,
-        checked:false
-      });
+      S.cart.push({name,qty:people,checked:false});
     }
   });
 
@@ -1250,101 +1267,134 @@ function addCart(items){
   renderCart();
   renderPlan();
 }
- function removeChecked(){S.cart=S.cart.filter(c=>!c.checked);save();renderCart();renderPlan();}
- function renderCart(){
+
+function removeChecked(){
+  S.cart=S.cart.filter(item=>!item.checked);
+  save();
+  renderCart();
+  renderPlan();
+}
+
+function renderCart(){
   const sec=document.querySelector('#nakup');
   if(!sec)return;
 
-  const list=sec.querySelector('#cartList');
-  if(!list)return;
+  const box=sec.querySelector('.detail');
+  if(!box)return;
 
-  list.innerHTML='';
+  const grouped={};
+  groupOrder.forEach(group=>grouped[group]=[]);
+  S.cart.forEach((item,index)=>{
+    const group=groupFor(item.name);
+    (grouped[group]??=[]).push({...item,index});
+  });
+
+  box.innerHTML=
+    '<div id="cartList"></div>'+
+    '<div class="action-row"><input id="newItem" placeholder="Přidat vlastní položku…"><button class="btn" id="addItem">＋ Přidat</button></div>'+
+    '<div class="action-row"><button class="btn secondary" id="clearChecked">✓ Odstranit odškrtnuté</button><button class="btn secondary" id="clearCart">🗑️ Vyprázdnit nákup</button></div>'+
+    '<a class="btn" href="#nakup-pomoc">🛒 Pomoz mi nakoupit</a>';
+
+  const list=box.querySelector('#cartList');
 
   if(!S.cart.length){
     list.innerHTML='<div class="note">Nákup je zatím prázdný.<br>U jídla klepni na „Přidat suroviny do nákupu“.</div>';
   }else{
-    const groups={};
-    S.cart.forEach(item=>(groups[groupFor(item.name)]??=[]).push(item));
-
     groupOrder.forEach(group=>{
-      if(!groups[group]?.length)return;
+      const items=grouped[group];
+      if(!items.length)return;
+
+      const section=document.createElement('div');
+      section.className='cart-group';
 
       const h=document.createElement('h2');
       h.textContent=group;
-      h.style.cssText='margin:18px 0 8px;font-size:18px;';
-      list.appendChild(h);
+      section.appendChild(h);
 
-      groups[group].forEach(c=>{
-        const l=document.createElement('label');
+      items.forEach(item=>{
+        const row=document.createElement('div');
+        row.className='row cart-item';
+        row.innerHTML=
+          '<input type="checkbox" '+(item.checked?'checked':'')+' aria-label="Odškrtnout '+item.name+'">'+
+          '<b style="flex:1;text-align:left">'+item.name+'</b>'+
+          '<button type="button" class="btn secondary cart-minus">−</button>'+
+          '<span class="muted" style="min-width:32px;text-align:center">×'+(item.qty||1)+'</span>'+
+          '<button type="button" class="btn secondary cart-plus">＋</button>';
 
-        l.className='row';
-        l.style.cssText='display:flex!important;align-items:center!important;gap:12px!important;margin:7px 0!important;padding:12px 14px!important;box-sizing:border-box!important;';
-
-        l.innerHTML=
-          `<input type="checkbox" ${c.checked?'checked':''} style="margin:0!important;flex:0 0 auto!important;width:18px!important;height:18px!important;">
-           <b style="flex:1!important;text-align:left!important;">${c.name}</b>
-           <span class="muted" style="margin-left:auto!important;white-space:nowrap!important;">×${c.qty||1}</span>`;
-
-        l.querySelector('input').onchange=e=>{
-          c.checked=e.target.checked;
-          save();
+        row.querySelector('input').onchange=async e=>{
+          if(!S.cart[item.index])return;
+          S.cart[item.index].checked=e.target.checked;
+          try{await save();}catch(err){console.warn('Nákup se nepodařilo uložit:',err);}
           renderPlan();
         };
 
-        list.appendChild(l);
+        row.querySelector('.cart-minus').onclick=()=>{
+          const current=S.cart[item.index];
+          if(!current)return;
+          current.qty=Math.max(0,(Number(current.qty)||1)-1);
+          if(current.qty===0)S.cart.splice(item.index,1);
+          save();
+          renderCart();
+          renderPlan();
+        };
+
+        row.querySelector('.cart-plus').onclick=()=>{
+          const current=S.cart[item.index];
+          if(!current)return;
+          current.qty=(Number(current.qty)||1)+1;
+          save();
+          renderCart();
+          renderPlan();
+        };
+
+        section.appendChild(row);
       });
+
+      list.appendChild(section);
     });
   }
 
-  const inp=sec.querySelector('#newItem');
-  const btn=sec.querySelector('#addItem');
-  const clr=sec.querySelector('#clearChecked');
-
-  if(btn)btn.onclick=()=>{
-    let v=inp.value.trim();
-    if(v){
-      addCart([v]);
-      inp.value='';
+  const input=box.querySelector('#newItem');
+  const add=box.querySelector('#addItem');
+  if(add) add.onclick=()=>{
+    const value=input?.value.trim();
+    if(!value)return;
+    addCart([value]);
+    if(input)input.value='';
+  };
+  if(input) input.onkeydown=e=>{
+    if(e.key==='Enter'){
+      e.preventDefault();
+      add?.click();
     }
   };
 
-  if(clr)clr.onclick=removeChecked;
+  const clear=box.querySelector('#clearChecked');
+  if(clear)clear.onclick=removeChecked;
+
+  const clearCart=box.querySelector('#clearCart');
+  if(clearCart)clearCart.onclick=()=>{
+    if(!S.cart.length)return;
+    if(confirm('Opravdu vyprázdnit celý nákupní seznam?')){
+      S.cart=[];
+      save();
+      renderCart();
+      renderPlan();
+    }
+  };
 }
- const groupOrder=['🥩 Maso a uzeniny','🥛 Mléčné a vejce','🥦 Ovoce a zelenina','🍚 Přílohy a pečivo','🥫 Trvanlivé','🧂 Ostatní'];
- function groupFor(n){
-  const x=norm(n);
 
-  if(/(^|\\s)(kure|kureci|veprove|vepro|hovezi|hove|mlete|maso|sunka|parek|klobasa|tunak)(\\s|$)/.test(x)){
-    return x.includes('sunka') ? '🥛 Mléčné a vejce' : '🥩 Maso a uzeniny';
-  }
-
-  if(/vejce|skyr|cottage|tvaroh|jogurt|smetana|mleko|maslo|syr|mozzarella/.test(x)){
-    return '🥛 Mléčné a vejce';
-  }
-
-  if(/banan|jablko|rajce|rajcata|okurek|okurky|zelenina|salat|paprika|mrkev|kvetak|brokolice|ovoce|avokado/.test(x)){
-    return '🥦 Ovoce a zelenina';
-  }
-
-  if(/ryze|testoviny|spagety|chleb|pecivo|rohlik|toast|tortilla|kuskus|brambor|vlocky/.test(x)){
-    return '🍚 Přílohy a pečivo';
-  }
-
-  if(/protlak|fazole|cocka|hrach|kakao|orech|kokos|kari|soja|vyvar/.test(x)){
-    return '🥫 Trvanlivé';
-  }
-
-  return '🧂 Ostatní';
-}
- function renderPlan(){
+function renderPlan(){
   const p=document.querySelector('#planList');
   if(!p)return;
+
   const store=localStorage.getItem('rs_store')||'Vyber obchod';
   const title=document.querySelector('#storeTitle');
   if(title)title.textContent='🛒 '+store;
 
   const groups={};
-  S.cart.forEach(c=>(groups[cartCategory(c.name)]??=[]).push(c));
+  groupOrder.forEach(group=>groups[group]=[]);
+  S.cart.forEach(item=>(groups[groupFor(item.name)]??=[]).push(item));
   p.innerHTML='';
 
   if(!S.cart.length){
@@ -1352,27 +1402,34 @@ function addCart(items){
     return;
   }
 
-  ['🥩 Maso a uzeniny','🥛 Mléčné a vejce','🥦 Ovoce a zelenina','🍚 Přílohy a pečivo','🥫 Trvanlivé','🧂 Ostatní'].forEach(group=>{
-    if(!groups[group]?.length)return;
+  groupOrder.forEach(group=>{
+    if(!groups[group].length)return;
+
     const h=document.createElement('h2');
     h.textContent=group;
     p.appendChild(h);
-    groups[group].forEach(c=>{
-      const l=document.createElement('label');
-      l.className='row';
-      l.innerHTML='<input type="checkbox" '+(c.checked?'checked':'')+'> '+c.name+' <span class="muted">×'+(c.qty||1)+'</span>';
-      l.querySelector('input').onchange=async e=>{
-        c.checked=e.target.checked;
+
+    groups[group].forEach(item=>{
+      const row=document.createElement('label');
+      row.className='row';
+      row.innerHTML='<input type="checkbox" '+(item.checked?'checked':'')+'> '+item.name+' <span class="muted">×'+(item.qty||1)+'</span>';
+      row.querySelector('input').onchange=async e=>{
+        item.checked=e.target.checked;
         try{await save();}catch(err){console.warn('Nákup se nepodařilo uložit:',err);}
         renderPlan();
+        renderCart();
       };
-      p.appendChild(l);
+      p.appendChild(row);
     });
   });
 }
 
- document.querySelectorAll('.store-choice').forEach(a=>a.addEventListener('click',()=>{localStorage.setItem('rs_store',a.dataset.store);setTimeout(renderPlan,20);}));
-
+document.querySelectorAll('.store-choice').forEach(a=>{
+  a.addEventListener('click',()=>{
+    localStorage.setItem('rs_store',a.dataset.store);
+    setTimeout(renderPlan,20);
+  });
+});
  init();window.addEventListener('hashchange',()=>setTimeout(init,20));
 })();
 </script></body></html>
