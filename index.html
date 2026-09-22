@@ -712,7 +712,7 @@ function syncHome(){
   document.body.classList.toggle('home-active',!location.hash);
   if(location.hash==='#dop'||location.hash==='#dopvice')renderRecs();
 }
-syncHome();
+setTimeout(syncHome,0);
 window.addEventListener('hashchange',syncHome);
 
 /* Jídlo po ruce – společné funkce */
