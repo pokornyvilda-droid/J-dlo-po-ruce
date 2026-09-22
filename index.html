@@ -627,8 +627,14 @@ function fits(id){const m=meals[id], t=state.time, n=state.need, p=state.place; 
 window.meals=meals;
 function card(id){const m=meals[id];return `<a class="meal" href="#j${id}"><div><h3>${m[0]}</h3><div class="meta">${m[1]} min</div></div><span class="pill">Detail</span></a>`}
 function renderRecs(){
-  const profile=S.profile||{};
-  const effectiveNeed=state.need||profile.preference||'normal';
+  let savedProfile={};
+  try{
+    const saved=JSON.parse(localStorage.getItem('rs_state_v1')||'{}');
+    savedProfile=saved.profile||{};
+  }catch(error){
+    savedProfile={};
+  }
+  const effectiveNeed=state.need||savedProfile.preference||'normal';
 
   const allIds=Object.keys(meals).map(Number).filter(id=>meals[id]);
   const preferred=new Set(pools[state.place]||[]);
