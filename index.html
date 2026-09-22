@@ -1248,18 +1248,16 @@ function groupFor(name){
 }
 
 function addCart(items){
-  const people=Math.max(1,Number(S.profile?.people)||1);
-
   items.forEach(value=>{
     const name=String(value||'').trim();
     if(!name)return;
 
     const existing=S.cart.find(c=>norm(c.name)===norm(name));
     if(existing){
-      existing.qty=(Number(existing.qty)||1)+people;
+      existing.qty=(Number(existing.qty)||1)+1;
       existing.checked=false;
     }else{
-      S.cart.push({name,qty:people,checked:false});
+      S.cart.push({name,qty:1,checked:false});
     }
   });
 
