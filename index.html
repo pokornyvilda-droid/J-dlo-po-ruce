@@ -1102,11 +1102,23 @@ function enhanceMealSearch(){
 function enhanceBottom(){
   const nav=document.querySelector('.bottom-inner');
   if(!nav)return;
-  nav.innerHTML='<a href="#"><b>⌂</b>Domů</a>'+
-    '<a href="#jidla"><b>🍲</b>Jídla</a>'+
-    '<a href="#nakup"><b>🛒</b>Nákup</a>'+
-    '<a href="#oblubene"><b>❤️</b>Oblíbené</a>'+
-    '<a href="#profil"><b>👤</b>Profil</a>';
+  nav.innerHTML='<a href="#" data-nav-hash=""><b>⌂</b>Domů</a>'+
+    '<a href="#jidla" data-nav-hash="jidla"><b>🍲</b>Jídla</a>'+
+    '<a href="#nakup" data-nav-hash="nakup"><b>🛒</b>Nákup</a>'+
+    '<a href="#oblubene" data-nav-hash="oblubene"><b>❤️</b>Oblíbené</a>'+
+    '<a href="#profil" data-nav-hash="profil"><b>👤</b>Profil</a>';
+
+  const update=()=>{
+    const hash=location.hash.replace(/^#/,'');
+    nav.querySelectorAll('[data-nav-hash]').forEach(a=>{
+      a.classList.toggle('active',a.dataset.navHash===hash);
+    });
+  };
+  update();
+  if(!nav.dataset.activeNavBound){
+    nav.dataset.activeNavBound='1';
+    window.addEventListener('hashchange',update);
+  }
 }
  function addFavPage(){if(document.querySelector('#oblubene'))return;let main=document.querySelector('main');let s=document.createElement('section');s.id='oblubene';s.className='page';s.innerHTML='<a class="btn secondary" href="#">← Domů</a><div class="hero"><h1>❤️ Oblíbená jídla</h1><p>Jídla, která chceš mít po ruce.</p></div><div id="favList" class="meal-list"></div>';main.appendChild(s)}
  function enhanceHome(){let h=document.querySelector('.home');if(!h||h.dataset.enhanced)return;h.dataset.enhanced='1';}
