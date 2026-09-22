@@ -110,28 +110,6 @@ export default {
       }
     }
 
-    // Test / diagnostika D1
-    if (url.pathname === "/api/db-test") {
-      try {
-        const tables = await env.DB
-          .prepare(`
-            SELECT name, sql
-            FROM sqlite_master
-            WHERE type = 'table'
-            ORDER BY name
-          `)
-          .all();
-
-        return json({
-          success: true,
-          database: "connected",
-          tables: tables.results
-        });
-      } catch (error) {
-        return json({ success: false, error: String(error) }, 500);
-      }
-    }
-
     return env.ASSETS.fetch(request);
   }
 };
