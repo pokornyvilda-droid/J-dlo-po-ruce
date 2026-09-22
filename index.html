@@ -627,55 +627,93 @@ function fits(id){const m=meals[id], t=state.time, n=state.need, p=state.place; 
 window.meals=meals;
 function card(id){const m=meals[id];return `<a class="meal" href="#j${id}"><div><h3>${m[0]}</h3><div class="meta">${m[1]} min</div></div><span class="pill">Detail</span></a>`}
 function renderRecs(){
-  let profile={};
-  try{
-    profile=JSON.parse(localStorage.getItem('rs_state_v1')||'{}').profile||{};
-  }catch(e){}
-
+  const profile=S.profile||{};
   const effectiveNeed=state.need||profile.preference||'normal';
 
-  // Všech 185 jídel je kandidátem. Kontext z původních poolů pouze
-  // zvýhodní vhodná jídla, ale už neblokuje novější jídla 61–185.
-  const allIds=Object.keys(meals).map(Number);
+  const allIds=Object.keys(meals).map(Number).filter(id=>meals[id]);
   const preferred=new Set(pools[state.place]||[]);
-  const candidates=allIds.filter(id=>{
+
+  const fits=[];
+  const fallback=[];
+
+  allIds.forEach(id=>{
     const m=meals[id];
-    if(!m)return false;
-    if(state.time==='10'&&m[1]>10)return false;
-    if(state.time==='30'&&m[1]>30)return false;
-    if(effectiveNeed==='protein'&&m[2]!=='protein')return false;
-    if(effectiveNeed==='light'&&m[2]!=='light')return false;
-    return true;
+    const timeOk=state.time==='10'?m[1]<=10:state.time==='30'?m[1]<=30:true;
+    const needOk=effectiveNeed==='protein'?m[2]==='protein':
+                 effectiveNeed==='light'?m[2]==='light':true;
+    const placeOk=!state.place ||
+      (state.place==='doma' ? m[3]==='doma' :
+       state.place==='obchod' ? m[3]==='obchod' :
+       state.place==='cesty' ? m[3]==='cesty' :
+       state.place==='rest' ? m[3]==='rest' : true);
+
+    if(timeOk&&needOk&&placeOk) fits.push(id);
+    if(timeOk&&needOk) fallback.push(id);
   });
 
-  const ids=candidates.sort((a,b)=>{
+  // Pokud kombinace filtrů nic nenajde, raději ukážeme vhodná jídla
+  // bez omezení místa než prázdnou stránku.
+  let ids=fits.length?fits:fallback;
+
+  ids=ids.sort((a,b)=>{
     const ap=preferred.has(a)?1:0;
     const bp=preferred.has(b)?1:0;
     if(ap!==bp)return bp-ap;
     return a-b;
   });
 
-  let seed=(state.place||'').length*7+(state.time||'').length*11+(effectiveNeed||'').length*13;
-  let rotated=ids.map((_,i)=>ids[(i+seed)%ids.length]);
+  if(!ids.length)ids=allIds;
 
-  let first=rotated.slice(0,3);
-  let more=rotated.slice(3,11);
+  const seed=(state.place||'').length*7+
+             (state.time||'').length*11+
+             effectiveNeed.length*13;
 
-  if(more.length<8)more=rotated.slice(0,8);
+  const rotated=ids.map((_,i)=>ids[(i+seed)%ids.length]);
+  const first=rotated.slice(0,3);
+  const more=rotated.slice(3,11);
 
-  document.getElementById('dop-list').innerHTML=first.map(card).join('');
-  document.getElementById('dop-more').innerHTML=more.map(card).join('');
+  const list=document.getElementById('dop-list');
+  const moreList=document.getElementById('dop-more');
+  if(list)list.innerHTML=first.map(card).join('');
+  if(moreList)moreList.innerHTML=more.map(card).join('');
+
+  const placeText={
+    doma:'doma',
+    obchod:'v obchodě',
+    cesty:'na cestách',
+    rest:'v restauraci'
+  }[state.place]||'bez omezení místa';
+
+  const timeText=state.time==='10'?'do 10 min':
+                 state.time==='30'?'do 30 min':'bez časového limitu';
 
   const preferenceText=
     effectiveNeed==='protein'?'více bílkovin':
-    effectiveNeed==='light'?'lehčí jídlo':
-    'normální jídlo';
+    effectiveNeed==='light'?'lehčí jídla':
+    'normální jídla';
 
-  document.getElementById('dop-sub').textContent=
-    `${first.length} konkrétní volby podle: ${state.place==='doma'?'doma':state.place==='obchod'?'obchod':state.place==='cesty'?'cesty':'restaurace'} · ${state.time==='10'?'do 10 min':state.time==='30'?'do 30 min':'bez limitu'} · ${preferenceText}.`;
+  const sub=document.getElementById('dop-sub');
+  if(sub){
+    sub.textContent=
+      first.length
+        ? `${first.length} konkrétní volby · ${placeText} · ${timeText} · ${preferenceText}`
+        : 'Zkus změnit některou volbu.';
+  }
 }
-document.querySelectorAll('.wizard-choice').forEach(el=>el.addEventListener('click',()=>{state[el.dataset.q]=el.dataset.v;if(el.dataset.q==='need')setTimeout(renderRecs,0)}));
-function syncHome(){document.body.classList.toggle('home-active',!location.hash);if(location.hash==='#dop'||location.hash==='#dopvice')renderRecs()}syncHome();window.addEventListener('hashchange',syncHome);
+
+document.querySelectorAll('.wizard-choice').forEach(el=>{
+  el.addEventListener('click',()=>{
+    state[el.dataset.q]=el.dataset.v;
+    setTimeout(renderRecs,0);
+  });
+});
+
+function syncHome(){
+  document.body.classList.toggle('home-active',!location.hash);
+  if(location.hash==='#dop'||location.hash==='#dopvice')renderRecs();
+}
+syncHome();
+window.addEventListener('hashchange',syncHome);
 
 /* Jídlo po ruce – společné funkce */
 (function(){
