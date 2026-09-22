@@ -1288,36 +1288,68 @@ function renderProfileGreeting(){
   const ids=[...new Set((S.favs||[]).map(Number))]
     .filter(id=>id>=1&&id<=185&&document.querySelector('#j'+id));
 
-  // Uložené ID, které už neexistuje, ti nezůstane viset v seznamu.
   if(ids.length!==(S.favs||[]).length){
     S.favs=ids;
   }
+
+  const oldHead=list.parentElement?.querySelector('.fav-summary');
+  if(oldHead)oldHead.remove();
 
   if(!ids.length){
     list.innerHTML='<div class="note">❤️ Zatím tu nemáš žádné oblíbené jídlo.<br>U jídla klepni na „Přidat do oblíbených“.</div>';
     return;
   }
 
+  const summary=document.createElement('div');
+  summary.className='fav-summary detail';
+  summary.innerHTML='<b>❤️ '+ids.length+' '+(ids.length===1?'oblíbené jídlo':'oblíbených jídel')+'</b>'+
+    '<button type="button" class="btn secondary" id="clearFavs" style="margin-top:10px">🗑️ Vymazat všechna oblíbená</button>';
+  list.parentElement.insertBefore(summary,list);
+
   list.innerHTML=ids.map(id=>{
     const sec=document.querySelector('#j'+id);
-    const title=sec?.querySelector('h1')?.textContent?.replace(/^\\d+\\.\\s*/,'').trim()||mealName(id);
+    const title=sec?.querySelector('h1')?.textContent?.replace(/^\d+\.\s*/,'').trim()||mealName(id);
     const meta=sec?.querySelector('.pill')?.textContent?.trim()||((window.meals?.[id]?.[1]||'')+' min');
+    const ingredients=getMealIngredients(id).slice(0,4).join(', ');
 
     return '<div class="meal fav-item">'+
-      '<a href="#j'+id+'" style="flex:1"><div><h3>'+title+'</h3><div class="meta">'+meta+'</div></div></a>'+
+      '<a href="#j'+id+'" style="flex:1;min-width:0"><div><h3>'+title+'</h3><div class="meta">'+meta+'</div>'+
+      (ingredients?'<div class="muted" style="margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">🛒 '+ingredients+'</div>':'')+
+      '</div></a>'+
+      '<div class="action-row" style="margin:0;flex-shrink:0">'+
+      '<button type="button" class="btn" data-fav-cart="'+id+'">🛒 Do nákupu</button>'+
       '<button type="button" class="btn secondary fav-remove" data-fav-id="'+id+'">✕ Odebrat</button>'+
-    '</div>';
+      '</div>'+
+      '</div>';
   }).join('');
+
+  list.querySelectorAll('[data-fav-cart]').forEach(btn=>{
+    btn.onclick=()=>{
+      const id=Number(btn.dataset.favCart);
+      const items=getMealIngredients(id);
+      if(!items.length)return;
+      addCart(items);
+      location.hash='nakup';
+    };
+  });
 
   list.querySelectorAll('.fav-remove').forEach(btn=>{
     btn.onclick=async()=>{
       const id=Number(btn.dataset.favId);
-      S.favs=S.favs.filter(x=>x!==id);
+      S.favs=S.favs.filter(x=>Number(x)!==id);
       renderFavs();
       injectMealActions();
       try{await save();}catch(e){console.warn('Oblíbené se nepodařilo uložit:',e);}
     };
   });
+
+  list.querySelector('#clearFavs').onclick=async()=>{
+    if(!confirm('Opravdu vymazat všechna oblíbená jídla?'))return;
+    S.favs=[];
+    renderFavs();
+    injectMealActions();
+    try{await save();}catch(e){console.warn('Oblíbená jídla se nepodařilo uložit:',e);}
+  };
 }
 
 async function init(){
