@@ -1340,18 +1340,32 @@ renderProfileGreeting();
   if(f&&!f.dataset.enhanced){
     f.dataset.enhanced='1';
 
-    f.onsubmit=e=>{
+    f.onsubmit=async e=>{
       e.preventDefault();
 
-      S.custom.push({
-        name:customName.value,
-        time:+customTime.value,
-        ingredients:customIngredients.value,
-        steps:customSteps.value
-      });
+      const item={
+        name:customName.value.trim(),
+        time:Number(customTime.value)||15,
+        ingredients:customIngredients.value.trim(),
+        steps:customSteps.value.trim()
+      };
 
-      save();
+      if(!item.name||!item.ingredients)return;
+
+      const editIndex=f.dataset.editIndex;
+      if(editIndex!==undefined&&S.custom[Number(editIndex)]){
+        S.custom[Number(editIndex)]=item;
+        delete f.dataset.editIndex;
+      }else{
+        S.custom.push(item);
+      }
+
+      try{await save();}catch(err){console.warn('Vlastní jídlo se nepodařilo uložit:',err);}
       f.reset();
+
+      const submit=f.querySelector('button[type="submit"]');
+      if(submit)submit.textContent='💾 Uložit moje jídlo';
+
       renderCustom();
       alert('Jídlo uloženo ❤️');
     };
