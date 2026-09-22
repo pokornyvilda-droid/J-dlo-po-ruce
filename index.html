@@ -246,6 +246,25 @@ a:hover{
   </div>
 
   <a class="btn secondary" href="#oblubene">❤️ Oblíbená jídla</a>
+  <a class="btn" href="#premium">⭐ JÍDLO PO RUCE Premium</a>
+</section>
+
+<section class="page" id="premium">
+  <a class="btn secondary" href="#profil">← Zpět na profil</a>
+  <div class="hero">
+    <span class="pill">Připraveno do budoucna</span>
+    <h1>⭐ JÍDLO PO RUCE Premium</h1>
+    <p>Prémiové funkce připravíme až podle toho, co budou lidé opravdu používat.</p>
+  </div>
+  <div class="detail">
+    <h2>Co plánujeme</h2>
+    <div class="meal-list">
+      <div class="meal"><div><h3>📸 AI lednice</h3><div class="meta">Chytřejší práce s tím, co máš doma.</div></div><span class="pill">Premium</span></div>
+      <div class="meal"><div><h3>📅 Pokročilé plánování</h3><div class="meta">Plán jídel podle tvých preferencí.</div></div><span class="pill">Premium</span></div>
+      <div class="meal"><div><h3>✨ Chytřejší doporučení</h3><div class="meta">Další personalizované funkce budeme přidávat postupně.</div></div><span class="pill">Premium</span></div>
+    </div>
+    <div class="note" style="margin-top:14px"><b>Teď je aplikace zdarma.</b><br>Premium zatím nic nezamyká a nic se ti neúčtuje.</div>
+  </div>
 </section>
 
 
@@ -731,6 +750,7 @@ window.addEventListener('hashchange',syncHome);
  const KEY='rs_state_v1';
  const S=JSON.parse(localStorage.getItem(KEY)||'{}');
  S.favs=S.favs||[]; S.cart=S.cart||[]; S.custom=S.custom||[]; S.fridge=S.fridge||[];
+ S.plan=S.plan==='premium'?'premium':'free';
 const save = async () => {
   localStorage.setItem(KEY, JSON.stringify(S));
 
