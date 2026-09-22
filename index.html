@@ -1163,34 +1163,47 @@ function enhanceBottom(){
  function addFavPage(){if(document.querySelector('#oblubene'))return;let main=document.querySelector('main');let s=document.createElement('section');s.id='oblubene';s.className='page';s.innerHTML='<a class="btn secondary" href="#">← Domů</a><div class="hero"><h1>❤️ Oblíbená jídla</h1><p>Jídla, která chceš mít po ruce.</p></div><div id="favList" class="meal-list"></div>';main.appendChild(s)}
  function enhanceHome(){let h=document.querySelector('.home');if(!h||h.dataset.enhanced)return;h.dataset.enhanced='1';}
  let d1Loaded=false;
+let d1Loading=false;
 
 async function loadFromD1(){
-  if(d1Loaded)return;
-  d1Loaded=true;
+  if(d1Loaded||d1Loading)return;
+  d1Loading=true;
 
   const userId=localStorage.getItem("rs_user_id");
-  if(!userId)return;
+  if(!userId){
+    d1Loaded=true;
+    d1Loading=false;
+    return;
+  }
 
   try{
-    const response=await fetch(`/api/user?id=${encodeURIComponent(userId)}`);
+    const response=await fetch("/api/user?id="+encodeURIComponent(userId));
     const data=await response.json();
 
-    if(data.success&&data.user&&data.user.preferences){
+    if(!response.ok||!data.success){
+      throw new Error(data.error||"Načtení profilu se nepodařilo.");
+    }
+
+    if(data.user&&data.user.preferences){
       const remote=typeof data.user.preferences==="string"
         ?JSON.parse(data.user.preferences)
         :data.user.preferences;
 
       Object.assign(S,remote);
 
-      S.favs=S.favs||[];
-      S.cart=S.cart||[];
-      S.custom=S.custom||[];
-      S.fridge=S.fridge||[];
+      S.favs=Array.isArray(S.favs)?S.favs:[];
+      S.cart=Array.isArray(S.cart)?S.cart:[];
+      S.custom=Array.isArray(S.custom)?S.custom:[];
+      S.fridge=Array.isArray(S.fridge)?S.fridge:[];
 
       localStorage.setItem(KEY,JSON.stringify(S));
     }
+
+    d1Loaded=true;
   }catch(error){
     console.warn("Načtení dat z D1 se nepodařilo:",error);
+  }finally{
+    d1Loading=false;
   }
 }
 function renderProfile() {
