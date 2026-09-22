@@ -932,20 +932,91 @@ function enhanceFridgePicker(){
   const result=document.querySelector('#domavysledky');
   if(!page||!result||page.dataset.enhanced)return;
   page.dataset.enhanced='1';
+
   const button=[...page.querySelectorAll('a.btn')].find(a=>a.getAttribute('href')==='#domavysledky');
   if(!button)return;
-  button.onclick=e=>{
+
+  const ingredients=[
+    'vejce','kuře','kuřecí maso','vepřové maso','hovězí maso','tuňák','šunka',
+    'tvaroh','skyr','cottage','jogurt','sýr','mléko','smetana','máslo',
+    'rýže','těstoviny','brambory','tortilla','chléb','ovesné vločky',
+    'rajčata','okurka','paprika','mrkev','brokolice','cibule','česnek',
+    'salát','banán','jablko','avokádo','fazole','čočka'
+  ];
+
+  const oldLabels=[...page.querySelectorAll('label.row')];
+  const oldButton=button;
+  const photoButton=[...page.querySelectorAll('a.btn.secondary')].find(a=>a.getAttribute('href')==='#fotodom');
+
+  const saved=new Set((S.fridge||[]).map(norm));
+
+  const picker=document.createElement('div');
+  picker.className='detail';
+  picker.style.marginTop='14px';
+  picker.innerHTML=
+    '<h2>🥕 Co mám doma?</h2>'+
+    '<p class="muted">Vyber suroviny, které máš. Můžeš jich označit klidně víc.</p>'+
+    '<input id="fridgeSearch" type="search" placeholder="🔎 Hledat surovinu…">'+
+    '<div id="fridgeCount" class="muted" style="margin:2px 0 10px"></div>'+
+    '<div id="manualIngredients" class="ingredient-picks"></div>'+
+    '<button class="btn secondary" id="clearFridge" type="button">✕ Zrušit výběr</button>';
+
+  oldLabels.forEach(x=>x.remove());
+  oldButton.before(picker);
+
+  const list=picker.querySelector('#manualIngredients');
+  const count=picker.querySelector('#fridgeCount');
+  const search=picker.querySelector('#fridgeSearch');
+
+  list.innerHTML=ingredients.map(name=>{
+    const checked=saved.has(norm(name));
+    return '<label class="ingredient-pick">'+
+      '<input type="checkbox" value="'+name.replace(/"/g,'&quot;')+'" '+(checked?'checked':'')+'>'+
+      '<span>'+name+'</span></label>';
+  }).join('');
+
+  const apply=()=>{
+    const q=norm(search.value);
+    let visible=0;
+    list.querySelectorAll('.ingredient-pick').forEach(label=>{
+      const match=!q||norm(label.textContent).includes(q);
+      label.style.display=match?'':'none';
+      if(match)visible++;
+    });
+    const selected=list.querySelectorAll('input:checked').length;
+    count.textContent=selected+' vybraných · '+visible+' zobrazených';
+  };
+
+  list.querySelectorAll('input').forEach(input=>input.addEventListener('change',apply));
+  search.addEventListener('input',apply);
+
+  picker.querySelector('#clearFridge').onclick=()=>{
+    list.querySelectorAll('input').forEach(input=>input.checked=false);
+    S.fridge=[];
+    save();
+    apply();
+  };
+
+  oldButton.onclick=e=>{
     e.preventDefault();
-    const selected=[...page.querySelectorAll('input[type="checkbox"]:checked')].map(x=>x.parentElement.textContent.trim()).filter(Boolean);
+
+    const selected=[...list.querySelectorAll('input:checked')].map(x=>x.value);
     S.fridge=selected;
     save();
+
     const ranked=rankMealsByIngredients(selected);
-    const list=result.querySelector('.meal-list');
-    list.innerHTML=selected.length
-      ? (ranked.length?ranked.map(r=>'<a class="meal" href="#j'+r.id+'"><div><h3>'+mealName(r.id)+'</h3><div class="meta">'+r.hit+' společné '+(r.hit===1?'surovina':'suroviny')+'</div></div><span class="pill">Detail</span></a>').join(''):'<div class="note">Z vybraných surovin zatím nemám vhodný recept.</div>')
+    const target=result.querySelector('.meal-list');
+
+    target.innerHTML=selected.length
+      ? (ranked.length
+        ? ranked.map(r=>'<a class="meal" href="#j'+r.id+'"><div><h3>'+mealName(r.id)+'</h3><div class="meta">'+r.hit+' společné '+(r.hit===1?'surovina':'suroviny')+'</div></div><span class="pill">Detail</span></a>').join('')
+        : '<div class="note">Z vybraných surovin zatím nemám vhodný recept.</div>')
       : '<div class="note">Vyber alespoň jednu surovinu.</div>';
+
     location.hash='domavysledky';
   };
+
+  apply();
 }
 function enhanceMealSearch(){
   const page=document.querySelector('#jidla');
