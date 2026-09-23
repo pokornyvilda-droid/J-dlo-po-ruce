@@ -169,7 +169,32 @@ export default {
             const title = normalizePhotoText(candidate?.title || "");
             if (!/^image\//i.test(mime) || !info?.thumburl) continue;
             if (/\b(logo|icon|map|flag|diagram|coat of arms|symbol|poster|screenshot)\b/i.test(title)) continue;
-            const score = [...wanted].reduce((sum, token) => sum + (title.includes(token) ? 1 : 0), 0);
+            const titleTokens = new Set(title.split(/\s+/).filter(Boolean));
+            const core = nameTokens.filter(t => t.length >= 5);
+            const matched = [...wanted].filter(token => titleTokens.has(token) || title.includes(token));
+            let score = matched.reduce((sum, token) => sum + (core.includes(token) ? 3 : 1), 0);
+            const normalizedQuery = normalizePhotoText(query);
+            const normalizedTitle = normalizePhotoText(candidate?.title || "");
+            if (normalizedTitle.includes(normalizedQuery)) score += 8;
+            if (core.length && core.every(token => normalizedTitle.includes(token))) score += 6;
+            const conflicts = [
+              ["ryze","brambor","brambory","potato","potatoes"],
+              ["brambor","ryze","rice"],
+              ["kase","kaše","mashed"],
+              ["salat","salad"],
+              ["knedlik","knedliky","dumpling","dumplings"],
+              ["testoviny","pasta","spaghetti"],
+              ["kure","chicken"],
+              ["hovezi","beef"],
+              ["veprove","pork"]
+            ];
+            for (const group of conflicts) {
+              if (core.some(t => group.includes(t))) {
+                const hasCore = core.some(t => group.includes(t));
+                if (hasCore && group.some(t => !core.includes(t) && normalizedTitle.includes(t))) score -= 7;
+              }
+            }
+            if (/\b(recipe|food|dish|meal|plate)\b/i.test(normalizedTitle)) score += 1;
             if (score > bestScore) {
               bestScore = score;
               page = candidate;
