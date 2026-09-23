@@ -87,7 +87,17 @@ export default {
         // a Commons pak vrátí spíš obecný obrázek nebo nic.
         const baseName = name.replace(/\s+s\s+.*$/i, "").trim();
         const shortName = name.split(/\s+/).slice(0, 3).join(" ").trim();
-        const queries = [...new Set([name + " food", baseName + " food", shortName + " food"].filter(Boolean))];
+        const translatedTokens = normalizePhotoText(name).split(/\s+/)
+          .flatMap(t => aliases[t] || [])
+          .filter(Boolean);
+        const englishName = [...new Set(translatedTokens)].slice(0, 6).join(" ");
+        const queries = [...new Set([
+          name + " food",
+          baseName + " food",
+          shortName + " food",
+          englishName ? englishName + " food" : "",
+          englishName ? englishName : ""
+        ].filter(Boolean))];
 
         const normalizePhotoText = (value) => String(value || "")
           .toLocaleLowerCase("cs-CZ")
@@ -95,18 +105,38 @@ export default {
           .replace(/[^a-z0-9]+/g, " ").trim();
 
         const aliases = {
-          vejce: ["egg","eggs"], avokado: ["avocado"], toast: ["toast"],
-          cocka: ["lentil","lentils"], gulas: ["goulash"],
-          brambory: ["potato","potatoes"], kureci: ["chicken"],
-          hovezi: ["beef"], veprove: ["pork"], syr: ["cheese"],
-          tvaroh: ["quark","curd"], palacinky: ["pancake","pancakes"],
-          livance: ["pancake","pancakes"], ryze: ["rice"],
-          testoviny: ["pasta"], spagety: ["spaghetti"],
-          houby: ["mushroom","mushrooms"], fazole: ["bean","beans"],
-          tortilla: ["tortilla","wrap"], salat: ["salad"], pizza: ["pizza"],
-          kure: ["chicken"], maso: ["meat"], skyr: ["skyr"],
-          jogurt: ["yogurt"], syr: ["cheese"], cibule: ["onion"],
-          cesnek: ["garlic"], mrkev: ["carrot"], rajce: ["tomato","tomatoes"]
+          vejce:["egg","eggs"], vejce:["egg","eggs"], avokado:["avocado"], toast:["toast"],
+          cocka:["lentil","lentils"], gulas:["goulash"], brambory:["potato","potatoes"],
+          bramborovy:["potato","potatoes"], kureci:["chicken"], kure:["chicken"], kurete:["chicken"],
+          hovezi:["beef"], hoveziho:["beef"], veprove:["pork"], veprovy:["pork"], veprové:["pork"],
+          maso:["meat"], masove:["meat"], masovy:["meat"], syr:["cheese"], syrem:["cheese"],
+          tvaroh:["quark","curd"], tvarohovy:["quark","curd"], palacinky:["pancake","pancakes"],
+          palacinka:["pancake","pancakes"], livance:["pancake","pancakes"], ryze:["rice"],
+          ryzi:["rice"], testoviny:["pasta"], testovinovy:["pasta"], spagety:["spaghetti"],
+          lasagne:["lasagna","lasagne"], nudle:["noodles"], knedlik:["dumpling","dumplings"],
+          knedliky:["dumplings"], omacka:["sauce"], omacky:["sauce"], stava:["gravy","sauce"],
+          gulas:["goulash"], guláš:["goulash"], polevka:["soup"], polevky:["soup"],
+          vyvar:["broth","stock"], bramborak:["potato pancake"], bramboraky:["potato pancakes"],
+          smazeny:["fried"], smazené:["fried"], pecene:["roasted","baked"], peceny:["roasted","baked"],
+          pecene:["roasted","baked"], zapecene:["baked","casserole"], zapeceny:["baked"],
+          kureci:["chicken"], kruti:["turkey"], kruta:["turkey"], kralik:["rabbit"],
+          ryba:["fish"], losos:["salmon"], tunak:["tuna"], treska:["cod"], krevety:["shrimp","prawns"],
+          houby:["mushroom","mushrooms"], houbovy:["mushroom"], fazole:["bean","beans"],
+          hrasek:["peas"], kukurice:["corn"], spenat:["spinach"], brokolice:["broccoli"],
+          cuketa:["zucchini"], paprika:["pepper"], rajce:["tomato","tomatoes"],
+          rajcatovy:["tomato"], rajska:["tomato","tomato sauce"], cibule:["onion"],
+          cesnek:["garlic"], mrkev:["carrot"], okurka:["cucumber","pickles"], salat:["salad"],
+          zelenina:["vegetables","vegetable"], smetana:["cream"], jogurt:["yogurt"],
+          skyr:["skyr"], cottage:["cottage cheese"], mozzarella:["mozzarella"],
+          sunkа:["ham"], sunkou:["ham"], slanina:["bacon"], klobasa:["sausage"],
+          párky:["sausage"], parek:["sausage"], vejcem:["egg"], vajec:["egg","eggs"],
+          mouka:["flour"], strouhanka:["breadcrumbs"], testoviny:["pasta"], pizza:["pizza"],
+          tortilla:["tortilla","wrap"], wrap:["wrap"], ryze:["rice"], vločky:["oats","oatmeal"],
+          vlocky:["oats","oatmeal"], banan:["banana"], jahody:["strawberry","strawberries"],
+          jablko:["apple"], jablka:["apples"], tvaroh:["quark","curd"], med:["honey"],
+          proteinove:["protein pancakes","pancakes"], snidane:["breakfast"], 
+          dezert:["dessert"], buchta:["cake"], kolac:["cake","pie"], buchtа:["cake"],
+          palačinky:["pancakes"], bramborovy:["potato"], bramborove:["potato"]
         };
 
         const stop = new Set(["a","s","se","na","do","z","v","ve","pro","po","podle","plus","bez","smes","jidlo","jidel","food"]);
