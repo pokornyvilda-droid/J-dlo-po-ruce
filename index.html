@@ -259,6 +259,14 @@ a:hover{
   window.addEventListener('hashchange',()=>setTimeout(init,30));
 })();
 </script>
+<style id="JPR-DYNAMIC-PHOTOS-V1">
+.meal.has-photo{display:block}
+.meal.has-photo > .pill{display:inline-block;margin-top:8px}
+.meal.has-photo > div{width:100%}
+.jpr-photo-loading{min-height:145px;border-radius:14px;background:#f4f5f0;display:grid;place-items:center;color:var(--muted);font-size:12px;margin-bottom:12px}
+.jpr-photo-wrap{margin-bottom:12px}
+.jpr-photo-wrap .meal-photo{margin-bottom:5px}
+</style>
 </head><body><div class="app"><header class="head"><div class="logo">JÍDLO PO RUCE</div><div class="tag">Méně rozhodování · méně zbytečných nákupů · více klidu</div></header><main><section class="home"><div class="home-art"><img alt="Jídlo po ruce – domácí obrazovka" src="rs-hero.png?v=185"/><div aria-label="Hlavní nabídka" class="hotspots"><a aria-label="Nevím, co jíst" class="hs hs-nevim" href="#q1"></a><a aria-label="Jsem doma" class="hs hs-doma" href="#doma"></a><a aria-label="Po tréninku" class="hs hs-trenink" href="#trenink"></a><a aria-label="Na cestách" class="hs hs-cesty" href="#cesty"></a><a aria-label="Do 10 minut" class="hs hs-rychle" href="#rychle"></a><a aria-label="Co mám doma" class="hs hs-mamdoma" href="#mamdoma"></a><a aria-label="Nákup" class="hs hs-nakup" href="#nakup"></a><a aria-label="Všech 185 jídel" class="hs hs-jidla" href="#jidla"></a><a aria-label="Vyfoť lednici" class="hs hs-fotodom" href="#fotodom"></a><a aria-label="Domů" class="hs hs-nav-home" href="#"></a><a aria-label="Jídla" class="hs hs-nav-jidla" href="#jidla"></a><a aria-label="Nákup" class="hs hs-nav-nakup" href="#nakup"></a><a aria-label="Oblíbené" class="hs hs-nav-oblibene" href="#oblubene"></a><a aria-label="Můj profil" class="hs hs-nav-profil" href="#profil"></a></div></div></section><section class="page" id="doma"><a class="btn secondary" href="#">← Domů</a><div class="hero"><h1>🍲 Jsem doma</h1><p>3 první volby a pak celý výběr.</p></div><div class="meal-list"><a class="meal" href="#j1"><h3>Kuřecí na paprice s rýží</h3><span class="pill">30 min</span></a><a class="meal" href="#j9"><h3>Vepřové na šťávě s rýží</h3><span class="pill">45 min</span></a><a class="meal" href="#j5"><h3>Špagety s boloňskou omáčkou</h3><span class="pill">30 min</span></a></div><a class="btn" href="#jidla">🍲 Chci něco jiného → všech 185</a></section>
 <section class="page" id="trenink"><a class="btn secondary" href="#">← Domů</a><div class="hero"><h1>💪 Právě jsem docvičil</h1><p>Vyber, kde právě jsi. Dám ti víc možností, ne jen jednu.</p></div><div class="grid"><a class="choice" href="#postdoma"><h3>🏠 Doma</h3><p class="muted">8 rychlých variant.</p></a><a class="choice" href="#postobchod"><h3>🛒 Obchod</h3><p class="muted">Nakoupíš a můžeš jíst hned.</p></a><a class="choice" href="#postbenzin"><h3>⛽ Benzínka</h3><p class="muted">Praktické volby bez vaření.</p></a><a class="choice" href="#postrest"><h3>🍽️ Restaurace</h3><p class="muted">Jak si vybrat po tréninku.</p></a><a class="choice" href="#postmicro"><h3>📦 Mikrovlnka</h3><p class="muted">Hotové jídlo za pár minut.</p></a></div></section>
 <section class="page" id="postdoma"><a class="btn secondary" href="#trenink">← Zpět</a><div class="hero"><h1>🏠 Po tréninku · doma</h1><p>8 praktických variant s důrazem na bílkoviny a jednoduchost.</p></div><div class="meal-list"><a class="meal" href="#j16"><div><h3>Kuře + rýže + zelenina</h3><div class="meta">po tréninku · 25 min</div></div><span class="pill">Detail</span></a><a class="meal" href="#j23"><div><h3>Vaječná tortilla</h3><div class="meta">po tréninku · 10 min</div></div><span class="pill">Detail</span></a><a class="meal" href="#j21"><div><h3>Tvaroh s ovocem</h3><div class="meta">po tréninku · 3 min</div></div><span class="pill">Detail</span></a><a class="meal" href="#j28"><div><h3>Kuřecí kuskus</h3><div class="meta">po tréninku · 15 min</div></div><span class="pill">Detail</span></a><a class="meal" href="#j29"><div><h3>Šunka + cottage toast</h3><div class="meta">po tréninku · 8 min</div></div><span class="pill">Detail</span></a><a class="meal" href="#j32"><div><h3>Ovesná kaše se skyrem</h3><div class="meta">po tréninku · 7 min</div></div><span class="pill">Detail</span></a><a class="meal" href="#j33"><div><h3>Vaječná rýže</h3><div class="meta">po tréninku · 15 min</div></div><span class="pill">Detail</span></a><a class="meal" href="#j31"><div><h3>Kuřecí quesadilla</h3><div class="meta">po tréninku · 15 min</div></div><span class="pill">Detail</span></a></div><a class="btn" href="#postvice">🔄 Chci něco jiného → další varianty</a></section>
@@ -1858,4 +1866,76 @@ document.querySelectorAll('.store-choice').forEach(a=>{
     setTimeout(initMealFilters, 20);
   });
 })();
-</script></body></html>
+</script><script id="JPR-DYNAMIC-PHOTOS-V1">
+(function(){
+  const loaded=new WeakSet();
+  async function loadPhoto(target,name,type){
+    if(!target||loaded.has(target))return;
+    loaded.add(target);
+    try{
+      const res=await fetch('/api/food-image?name='+encodeURIComponent(name),{cache:'force-cache'});
+      if(!res.ok)throw new Error('not found');
+      const blob=await res.blob();
+      const src=URL.createObjectURL(blob);
+      const img=document.createElement('img');
+      img.className=type==='detail'?'detail-photo':'meal-photo';
+      img.src=src;
+      img.alt=name;
+      img.loading='lazy';
+      img.decoding='async';
+      img.onerror=()=>{img.remove();};
+      const wrap=document.createElement('div');
+      wrap.className='jpr-photo-wrap';
+      wrap.appendChild(img);
+      const credit=document.createElement('div');
+      credit.className='photo-credit';
+      const who=res.headers.get('X-JPR-Photo-Credit')||'Wikimedia Commons';
+      const lic=res.headers.get('X-JPR-Photo-License')||'';
+      credit.textContent='Foto: '+who+(lic?' · '+lic:'');
+      wrap.appendChild(credit);
+      if(type==='detail') target.insertBefore(wrap,target.firstChild);
+      else target.insertBefore(wrap,target.firstChild);
+    }catch(e){
+      // Pokud Commons vhodnou fotku nemá, kartu necháme bez rozbitého obrázku.
+    }
+  }
+  function setup(){
+    const detailTargets=[];
+    for(let id=1;id<=185;id++){
+      const section=document.getElementById('j'+id);
+      if(section){
+        const pill=section.querySelector('.pill');
+        if(pill && !section.querySelector('.jpr-photo-wrap')){
+          const title=(section.querySelector('h1')?.textContent||'').replace(/^\d+\.\s*/,'').trim();
+          detailTargets.push({el:section,name:title,type:'detail'});
+        }
+      }
+    }
+    document.querySelectorAll('#jidla .meal').forEach(meal=>{
+      if(meal.querySelector('.jpr-photo-wrap'))return;
+      const title=(meal.querySelector('h3')?.textContent||'').trim();
+      if(!title)return;
+      meal.classList.add('has-photo');
+      detailTargets.push({el:meal,name:title,type:'meal'});
+    });
+    if(!('IntersectionObserver' in window)){
+      detailTargets.forEach(x=>loadPhoto(x.el,x.name,x.type));
+      return;
+    }
+    const io=new IntersectionObserver(entries=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting){
+          const x=entry.target.__jprPhoto;
+          loadPhoto(x.el,x.name,x.type);
+          io.unobserve(entry.target);
+        }
+      });
+    },{rootMargin:'500px 0px'});
+    detailTargets.forEach(x=>{x.el.__jprPhoto=x;io.observe(x.el);});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup);
+  else setup();
+  window.addEventListener('hashchange',()=>setTimeout(setup,80));
+})();
+</script>
+</body></html>
