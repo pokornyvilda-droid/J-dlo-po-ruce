@@ -51,9 +51,9 @@ export default {
             license: "CC BY 3.0"
           },
           "kuřecí řízek s bramborovým salátem": {
-            url: "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ku%C5%99ec%C3%AD_%C5%99%C3%ADzek_s_bramborov%C3%BDm_sal%C3%A1tem_20240914_121336.jpg?width=900",
-            credit: "VANOCE2022 / Wikimedia Commons",
-            license: "CC0 1.0"
+            url: "https://commons.wikimedia.org/wiki/Special:Redirect/file/Bramborov%C3%BD_sal%C3%A1t_s_%C5%99%C3%ADzkem.jpg?width=900",
+            credit: "Dezidor / Wikimedia Commons",
+            license: "CC BY 3.0"
           },
           "rizoto s kuřetem": {
             url: "https://commons.wikimedia.org/wiki/Special:Redirect/file/Rizoto_z_hov%C4%9Bz%C3%ADho_masa_01.jpg?width=900",
