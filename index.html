@@ -1975,13 +1975,15 @@ document.querySelectorAll('.store-choice').forEach(a=>{
 .jpr-recipe-actions{display:grid;gap:10px;margin:0 0 18px}
 .jpr-recipe-actions .btn{width:100%;margin:0;text-align:center;font-size:16px;padding:14px 16px;border-radius:15px}
 .jpr-recipe-actions .secondary{background:#e7f1e9}
-.jpr-ingredients-box{background:#fff;border:1px solid #e5e2d9;border-radius:18px;overflow:hidden;margin:0 0 22px}
-.jpr-section-title{display:flex;align-items:center;gap:9px;padding:16px 17px 10px;margin:0!important;font-size:21px!important;color:#174f3d!important}
-.jpr-portion-wrap{margin:0 10px 12px}
-.jpr-ingredient-list{padding:0 10px 10px}
-.jpr-ingredient-row{display:flex;justify-content:space-between;gap:12px;padding:10px 10px;border-top:1px solid #ece9e1;font-size:15px;line-height:1.3}
-.jpr-ingredient-row span:first-child{flex:1}
-.jpr-ingredient-row span:last-child{font-weight:700;text-align:right;white-space:nowrap}
+.jpr-ingredients-box{background:transparent;border:0;border-radius:0;overflow:visible;margin:0 0 24px}
+.jpr-section-title{display:flex;align-items:center;gap:9px;padding:0 4px 10px;margin:0!important;font-size:21px!important;color:#174f3d!important}
+.jpr-portion-wrap{margin:0 0 12px}
+.jpr-ingredient-list{background:#fff;border:1px solid #e5e2d9;border-radius:18px;overflow:hidden;padding:0}
+.jpr-ingredient-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;padding:8px 12px;border-top:1px solid #e8e5de;font-size:15px;line-height:1.25;min-height:28px}
+.jpr-ingredient-row:first-child{border-top:0}
+.jpr-ingredient-row span:first-child{min-width:0}
+.jpr-ingredient-row span:last-child{font-weight:500;text-align:right;white-space:nowrap}
+
 .jpr-steps-box{background:#fff;border:1px solid #e5e2d9;border-radius:18px;padding:0 10px 10px;margin-bottom:18px}
 .jpr-step{display:flex;gap:10px;padding:11px 7px;border-top:1px solid #ece9e1;font-size:15px;line-height:1.45}
 .jpr-step-num{flex:0 0 30px;height:30px;border-radius:50%;background:#e6f2e9;color:#174f3d;display:grid;place-items:center;font-weight:800}
@@ -2007,6 +2009,10 @@ document.querySelectorAll('.store-choice').forEach(a=>{
   function renderIngredients(section,p){
     const box=section.querySelector('.jpr-ingredient-list');
     if(!box)return;
+    const picker=section.querySelector('.jpr-portion-picker');
+    const current=picker?.querySelector('.jpr-portion-btn.active')?.dataset.portions || '4';
+    const title=section.querySelector('.jpr-ingredients-box .jpr-section-title');
+    if(title) title.textContent='🛒 Ingredience ('+current+' porce)';
     const items=splitIngredients(p.textContent);
     box.innerHTML=items.map(item=>{
       const m=item.match(/^(.*?)(\s+\d+(?:[.,]\d+)?\s*(?:g|kg|ml|l|ks|stroužky?|lžíce?|lžičky?|dl|cl))$/i);
@@ -2056,7 +2062,7 @@ document.querySelectorAll('.store-choice').forEach(a=>{
 
     const ingBox=document.createElement('div');
     ingBox.className='jpr-ingredients-box';
-    ingH.className='jpr-section-title'; ingH.textContent='🛒 Suroviny';
+    ingH.className='jpr-section-title'; ingH.textContent='🛒 Ingredience (4 porce)';
     ingBox.appendChild(ingH);
     const portion=detail.querySelector('.jpr-portion-picker');
     if(portion) { portion.classList.add('jpr-portion-wrap'); ingBox.appendChild(portion); }
