@@ -64,7 +64,7 @@ export default {
         const normalizeFoodKey = (value) => String(value || "")
           .toLocaleLowerCase("cs-CZ")
           .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-          .replace(/\\s+/g, " ").trim();
+          .replace(/\s+/g, " ").trim();
         const direct = known[name.toLocaleLowerCase("cs-CZ")] || known[normalizeFoodKey(name)];
         if (direct) {
           const image = await fetch(direct.url, { headers: { "User-Agent": "JidloPoRuce/1.0" }, cf: { cacheEverything: true, cacheTtl: 604800 } });
