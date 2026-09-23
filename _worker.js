@@ -23,29 +23,6 @@ export default {
     }
 
 
-    // Proxy obrázků jídel přes Worker – mobilní prohlížeč tak nemusí načítat Wikimedia přímo.
-    if (url.pathname === "/api/food-image" && request.method === "GET") {
-      const dish = url.searchParams.get("dish");
-      const images = {
-        "64": "https://images.unsplash.com/flagged/photo-1579386471443-9efb1386486c?auto=format&fit=crop&fm=jpg&ixlib=rb-4.1.0&q=85&w=1200"
-      };
-      const source = images[dish];
-      if (!source) return new Response("Obrázek nenalezen.", { status: 404 });
-      try {
-        const image = await fetch(source, {
-          headers: { "User-Agent": "JidloPoRuce/1.0" },
-          cf: { cacheEverything: true, cacheTtl: 86400 }
-        });
-        if (!image.ok) return new Response("Obrázek se nepodařilo načíst.", { status: 502 });
-        const headers = new Headers(image.headers);
-        headers.set("Cache-Control", "public, max-age=86400");
-        headers.set("Access-Control-Allow-Origin", "*");
-        return new Response(image.body, { status: 200, headers });
-      } catch (error) {
-        return new Response("Chyba při načítání obrázku.", { status: 502 });
-      }
-    }
-
     // JPR-DYNAMIC-COMMONS-V1 – vyhledání a proxy fotek jídel z Wikimedia Commons.
     if (url.pathname === "/api/food-image" && request.method === "GET") {
       const name = (url.searchParams.get("name") || "").trim();
