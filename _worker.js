@@ -27,7 +27,7 @@ export default {
     if (url.pathname === "/api/food-image" && request.method === "GET") {
       const dish = url.searchParams.get("dish");
       const images = {
-        "64": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Hospodsky_gulasek.jpg/1024px-Hospodsky_gulasek.jpg"
+        "64": "https://images.unsplash.com/flagged/photo-1579386471443-9efb1386486c?auto=format&fit=crop&fm=jpg&ixlib=rb-4.1.0&q=85&w=1200"
       };
       const source = images[dish];
       if (!source) return new Response("Obrázek nenalezen.", { status: 404 });
