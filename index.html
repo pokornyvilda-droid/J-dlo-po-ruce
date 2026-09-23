@@ -1893,8 +1893,11 @@ document.querySelectorAll('.store-choice').forEach(a=>{
       const lic=res.headers.get('X-JPR-Photo-License')||'';
       credit.textContent='Foto: '+who+(lic?' · '+lic:'');
       wrap.appendChild(credit);
-      if(type==='detail') target.insertBefore(wrap,target.firstChild);
-      else target.insertBefore(wrap,target.firstChild);
+      if(type==='detail'){
+        const pill=target.querySelector('.pill');
+        if(pill) pill.insertAdjacentElement('afterend',wrap);
+        else target.insertBefore(wrap,target.firstChild);
+      }else target.insertBefore(wrap,target.firstChild);
     }catch(e){
       // Pokud Commons vhodnou fotku nemá, kartu necháme bez rozbitého obrázku.
     }
