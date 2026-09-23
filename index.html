@@ -2077,7 +2077,10 @@ document.querySelectorAll('.store-choice').forEach(a=>{
     ingH.className='jpr-section-title'; ingH.textContent='🛒 Ingredience (4 porce)';
     ingBox.appendChild(ingH);
     const portion=detail.querySelector('.jpr-portion-picker');
-    if(portion) { portion.classList.add('jpr-portion-wrap'); ingBox.appendChild(portion); }
+    if(portion) {
+      portion.classList.add('jpr-portion-wrap');
+      portion.style.display='none';
+    }
     ingBox.appendChild(ingP);
     const list=document.createElement('div'); list.className='jpr-ingredient-list'; ingBox.appendChild(list);
     detail.insertBefore(ingBox,procH);
