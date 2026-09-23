@@ -34,11 +34,10 @@ export default {
         // Ověřené mapování pro nejčastější recepty, kde automatické hledání může trefit kategorii místo fotografie.
         const known = {
           "pečené kuře s bramborem": {
-            url: "https://commons.wikimedia.org/wiki/Special:Redirect/file/Roasted_Chicken%2C_Butterflied%2C_on_Potatoes%2C_Baking_Pan_01.jpg?width=900",
-            credit: "Michael J. Bennett / Wikimedia Commons",
-            license: "CC BY-SA 3.0"
-          },
-          "kuřecí na paprice s rýží": {
+            url: "https://commons.wikimedia.org/wiki/Special:Redirect/file/Chicken_Dinner%2C_2009.jpg?width=900",
+            credit: "Steve Dunham / Wikimedia Commons",
+            license: "CC BY 2.0"
+          },          "kuřecí na paprice s rýží": {
             url: "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ku%C5%99e_na_paprice_-_Czech_Republic.jpg?width=900",
             credit: "Pohled 111 / Wikimedia Commons",
             license: "CC BY-SA 4.0"
