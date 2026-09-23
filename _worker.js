@@ -51,8 +51,8 @@ export default {
         }
         // Zkusíme několik variant názvu. U českých receptů bývá název příliš dlouhý
         // a Commons pak vrátí spíš obecný obrázek nebo nic.
-        const baseName = name.replace(/\\s+s\\s+.*$/i, "").trim();
-        const shortName = name.split(/\\s+/).slice(0, 3).join(" ").trim();
+        const baseName = name.replace(/\s+s\s+.*$/i, "").trim();
+        const shortName = name.split(/\s+/).slice(0, 3).join(" ").trim();
         const queries = [...new Set([name + " food", baseName + " food", shortName + " food"].filter(Boolean))];
 
         let page = null;
@@ -75,7 +75,7 @@ export default {
             const info = p?.imageinfo?.[0];
             const mime = info?.thumbmime || info?.mime || "";
             const title = String(p?.title || "").toLowerCase();
-            return /^image\\//i.test(mime) && info?.thumburl &&
+            return /^image\//i.test(mime) && info?.thumburl &&
               !/logo|icon|map|flag|diagram|coat of arms|symbol/.test(title);
           });
           if (candidate) { page = candidate; break; }
