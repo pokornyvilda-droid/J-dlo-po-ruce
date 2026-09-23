@@ -55,14 +55,40 @@ export default {
         const shortName = name.split(/\s+/).slice(0, 3).join(" ").trim();
         const queries = [...new Set([name + " food", baseName + " food", shortName + " food"].filter(Boolean))];
 
+        const normalizePhotoText = (value) => String(value || "")
+          .toLocaleLowerCase("cs-CZ")
+          .normalize("NFD").replace(/[\\u0300-\\u036f]/g, "")
+          .replace(/[^a-z0-9]+/g, " ").trim();
+
+        const aliases = {
+          vejce: ["egg","eggs"], avokado: ["avocado"], toast: ["toast"],
+          cocka: ["lentil","lentils"], gulas: ["goulash"],
+          brambory: ["potato","potatoes"], kureci: ["chicken"],
+          hovezi: ["beef"], veprove: ["pork"], syr: ["cheese"],
+          tvaroh: ["quark","curd"], palacinky: ["pancake","pancakes"],
+          livance: ["pancake","pancakes"], ryze: ["rice"],
+          testoviny: ["pasta"], spagety: ["spaghetti"],
+          houby: ["mushroom","mushrooms"], fazole: ["bean","beans"],
+          tortilla: ["tortilla","wrap"], salat: ["salad"], pizza: ["pizza"],
+          kure: ["chicken"], maso: ["meat"], skyr: ["skyr"],
+          jogurt: ["yogurt"], syr: ["cheese"], cibule: ["onion"],
+          cesnek: ["garlic"], mrkev: ["carrot"], rajce: ["tomato","tomatoes"]
+        };
+
+        const stop = new Set(["a","s","se","na","do","z","v","ve","pro","po","podle","plus","bez","smes","jidlo","jidel","food"]);
+        const nameTokens = normalizePhotoText(name).split(/\\s+/).filter(t => t.length >= 4 && !stop.has(t));
+        const wanted = new Set(nameTokens);
+        nameTokens.forEach(t => (aliases[t] || []).forEach(a => wanted.add(a)));
+
         let page = null;
+        let bestScore = 0;
         for (const query of queries) {
           const api = new URL("https://commons.wikimedia.org/w/api.php");
           api.searchParams.set("action", "query");
           api.searchParams.set("generator", "search");
           api.searchParams.set("gsrsearch", query);
           api.searchParams.set("gsrnamespace", "6");
-          api.searchParams.set("gsrlimit", "8");
+          api.searchParams.set("gsrlimit", "12");
           api.searchParams.set("prop", "imageinfo");
           api.searchParams.set("iiprop", "url|mime|extmetadata");
           api.searchParams.set("iiurlwidth", "900");
@@ -71,15 +97,23 @@ export default {
           if (!search.ok) continue;
           const data = await search.json();
           const pages = Object.values(data?.query?.pages || {});
-          const candidate = pages.find(p => {
-            const info = p?.imageinfo?.[0];
+          for (const candidate of pages) {
+            const info = candidate?.imageinfo?.[0];
             const mime = info?.thumbmime || info?.mime || "";
-            const title = String(p?.title || "").toLowerCase();
-            return /^image\//i.test(mime) && info?.thumburl &&
-              !/logo|icon|map|flag|diagram|coat of arms|symbol/.test(title);
-          });
-          if (candidate) { page = candidate; break; }
+            const title = normalizePhotoText(candidate?.title || "");
+            if (!/^image\\//i.test(mime) || !info?.thumburl) continue;
+            if (/\\b(logo|icon|map|flag|diagram|coat of arms|symbol|poster|screenshot)\\b/i.test(title)) continue;
+            const score = [...wanted].reduce((sum, token) => sum + (title.includes(token) ? 1 : 0), 0);
+            if (score > bestScore) {
+              bestScore = score;
+              page = candidate;
+            }
+          }
+          if (bestScore >= 2) break;
         }
+
+        // Nikdy nezobrazíme náhodnou fotku jen proto, že Commons něco našlo.
+        if (bestScore === 0) page = null;
 
         if (!page) return new Response("Fotka nenalezena.", { status: 404 });
         const info = page.imageinfo[0];
