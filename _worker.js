@@ -34,6 +34,21 @@ export default {
             url: "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ku%C5%99e_na_paprice_-_Czech_Republic.jpg?width=900",
             credit: "Pohled 111 / Wikimedia Commons",
             license: "CC BY-SA 4.0"
+          },
+          "čočka na kyselo s vejcem": {
+            url: "https://commons.wikimedia.org/wiki/Special:Redirect/file/%C4%8Co%C4%8Dka_na_kyselo_s_vejcem_03.jpg?width=900",
+            credit: "Pohled 111 / Wikimedia Commons",
+            license: "CC BY-SA 4.0"
+          },
+          "pečené kuře s bramborem": {
+            url: "https://commons.wikimedia.org/wiki/Special:Redirect/file/Pe%C4%8Den%C3%A9_ku%C5%99e_s_r%C3%BD%C5%BE%C3%AD.jpg?width=900",
+            credit: "Dezidor / Wikimedia Commons",
+            license: "CC BY 3.0"
+          },
+          "kuřecí řízky s bramborem": {
+            url: "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ku%C5%99ec%C3%AD_%C5%99%C3%ADzek%2C_bramborov%C3%A1_ka%C5%A1e.jpg?width=900",
+            credit: "Dezidor / Wikimedia Commons",
+            license: "CC BY 3.0"
           }
         };
         const direct = known[name.toLocaleLowerCase("cs-CZ")];
