@@ -1873,7 +1873,7 @@ document.querySelectorAll('.store-choice').forEach(a=>{
     if(!target||loaded.has(target))return;
     loaded.add(target);
     try{
-      const res=await fetch('/api/food-image?name='+encodeURIComponent(name)+'&v=2',{cache:'no-store'});
+      const res=await fetch('/api/food-image?name='+encodeURIComponent(name)+'&v=3',{cache:'no-store'});
       if(!res.ok)throw new Error('not found');
       const blob=await res.blob();
       const src=URL.createObjectURL(blob);
