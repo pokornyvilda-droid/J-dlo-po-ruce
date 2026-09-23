@@ -49,6 +49,16 @@ export default {
             url: "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ku%C5%99ec%C3%AD_%C5%99%C3%ADzek%2C_bramborov%C3%A1_ka%C5%A1e.jpg?width=900",
             credit: "Dezidor / Wikimedia Commons",
             license: "CC BY 3.0"
+          },
+          "rizoto s kuřetem": {
+            url: "https://commons.wikimedia.org/wiki/Special:Redirect/file/Rizoto_z_hov%C4%9Bz%C3%ADho_masa_01.jpg?width=900",
+            credit: "Pohled 111 / Wikimedia Commons",
+            license: "CC BY-SA 4.0"
+          },
+          "palačinky s tvarohem": {
+            url: "https://commons.wikimedia.org/wiki/Special:Redirect/file/Pala%C4%8Dinka.jpg?width=900",
+            credit: "V0lkanic / Wikimedia Commons",
+            license: "CC BY 4.0"
           }
         };
         const direct = known[name.toLocaleLowerCase("cs-CZ")];
