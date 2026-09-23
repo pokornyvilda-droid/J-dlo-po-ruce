@@ -16,9 +16,12 @@ export default {
       const response = await env.ASSETS.fetch(request);
       const html = await response.text();
       const cleaned = html;
+      const headers = new Headers(response.headers);
+      headers.set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+      headers.set("Pragma", "no-cache");
       return new Response(cleaned, {
         status: response.status,
-        headers: response.headers
+        headers
       });
     }
 
