@@ -33,20 +33,8 @@ export default {
       try {
         // Ověřené mapování pro nejčastější recepty, kde automatické hledání může trefit kategorii místo fotografie.
         const known = {
-          "pečené kuře s bramborem": {
-            url: "https://commons.wikimedia.org/wiki/Special:Redirect/file/Chicken_Dinner%2C_2009.jpg?width=900",
-            credit: "Steve Dunham / Wikimedia Commons",
-            license: "CC BY 2.0"
-          },          "kuřecí na paprice s rýží": {
-            url: "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ku%C5%99e_na_paprice_-_Czech_Republic.jpg?width=900",
-            credit: "Pohled 111 / Wikimedia Commons",
-            license: "CC BY-SA 4.0"
-          },
-          "čočka na kyselo s vejcem": {
-            url: "https://commons.wikimedia.org/wiki/Special:Redirect/file/%C4%8Co%C4%8Dka_na_kyselo_s_vejcem_03.jpg?width=900",
-            credit: "Pohled 111 / Wikimedia Commons",
-            license: "CC BY-SA 4.0"
-          },
+
+
           "kuřecí řízky s bramborem": {
             url: "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ku%C5%99ec%C3%AD_%C5%99%C3%ADzek_ve_strouhnace_se_sezamem%2C_brambory%2C_obloha.jpg?width=900",
             credit: "Dezidor / Wikimedia Commons",
@@ -169,31 +157,58 @@ export default {
             const title = normalizePhotoText(candidate?.title || "");
             if (!/^image\//i.test(mime) || !info?.thumburl) continue;
             if (/\b(logo|icon|map|flag|diagram|coat of arms|symbol|poster|screenshot)\b/i.test(title)) continue;
-            const titleTokens = new Set(title.split(/\s+/).filter(Boolean));
-            const core = nameTokens.filter(t => t.length >= 5);
-            const matched = [...wanted].filter(token => titleTokens.has(token) || title.includes(token));
-            let score = matched.reduce((sum, token) => sum + (core.includes(token) ? 3 : 1), 0);
-            const normalizedQuery = normalizePhotoText(query);
             const normalizedTitle = normalizePhotoText(candidate?.title || "");
-            if (normalizedTitle.includes(normalizedQuery)) score += 8;
-            if (core.length && core.every(token => normalizedTitle.includes(token))) score += 6;
-            const conflicts = [
-              ["ryze","brambor","brambory","potato","potatoes"],
-              ["brambor","ryze","rice"],
-              ["kase","kaše","mashed"],
-              ["salat","salad"],
-              ["knedlik","knedliky","dumpling","dumplings"],
-              ["testoviny","pasta","spaghetti"],
-              ["kure","chicken"],
+            const titleTokens = new Set(normalizedTitle.split(/\s+/).filter(Boolean));
+            const core = nameTokens.filter(t => t.length >= 4);
+            const matched = [...wanted].filter(token => titleTokens.has(token) || normalizedTitle.includes(token));
+            let score = matched.reduce((sum, token) => sum + (core.includes(token) ? 3 : 1), 0);
+
+            // Fotku přijmeme jen pokud název souboru obsahuje všechny důležité části jídla.
+            // Tím zabráníme např. čočce, která se tváří jako brambory, nebo kuřeti s jinou přílohou.
+            const conceptGroups = [
+              ["kure","kureci","chicken"],
               ["hovezi","beef"],
-              ["veprove","pork"]
+              ["veprove","vepro","pork"],
+              ["kruti","kruta","turkey"],
+              ["ryze","ryzi","rice"],
+              ["brambor","brambory","potato","potatoes"],
+              ["cocka","lentil","lentils"],
+              ["gulas","goulash"],
+              ["vejce","vejcem","vejci","egg","eggs"],
+              ["paprika"],
+              ["testoviny","pasta","spaghetti"],
+              ["sunka","sunkou","ham"],
+              ["knedlik","knedliky","dumpling","dumplings"],
+              ["salat","salad"],
+              ["rajsky","rajska","rajcat","tomato"],
+              ["syr","cheese"],
+              ["houby","houbovy","mushroom","mushrooms"]
             ];
-            for (const group of conflicts) {
-              if (core.some(t => group.includes(t))) {
-                const hasCore = core.some(t => group.includes(t));
-                if (hasCore && group.some(t => !core.includes(t) && normalizedTitle.includes(t))) score -= 7;
+            const required = [];
+            for (const group of conceptGroups) {
+              if (core.some(token => group.includes(token))) required.push(group);
+            }
+            const missingRequired = required.filter(group =>
+              !group.some(token => normalizedTitle.includes(token))
+            );
+            if (missingRequired.length) continue;
+
+            // Když název obsahuje jednu z těchto příloh, jinou přílohu penalizujeme.
+            const conflicts = [
+              [["ryze","ryzi","rice"],["brambor","brambory","potato","potatoes","kase","mashed"]],
+              [["brambor","brambory","potato","potatoes"],["ryze","ryzi","rice"]],
+              [["kase","mashed"],["brambor","brambory","potato","potatoes"]],
+              [["testoviny","pasta","spaghetti"],["ryze","ryzi","rice","brambor","brambory","potato","potatoes"]],
+              [["knedlik","knedliky","dumpling","dumplings"],["ryze","ryzi","rice"]]
+            ];
+            for (const [wantedGroup, wrongGroup] of conflicts) {
+              if (core.some(t => wantedGroup.includes(t)) && wrongGroup.some(t => normalizedTitle.includes(t))) {
+                score -= 10;
               }
             }
+
+            if (normalizedTitle.includes(normalizePhotoText(name))) score += 12;
+            if (core.length && core.every(token => normalizedTitle.includes(token))) score += 8;
             if (/\b(recipe|food|dish|meal|plate)\b/i.test(normalizedTitle)) score += 1;
             if (score > bestScore) {
               bestScore = score;
