@@ -22,6 +22,30 @@ export default {
       });
     }
 
+
+    // Proxy obrázků jídel přes Worker – mobilní prohlížeč tak nemusí načítat Wikimedia přímo.
+    if (url.pathname === "/api/food-image" && request.method === "GET") {
+      const dish = url.searchParams.get("dish");
+      const images = {
+        "64": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Hospodsky_gulasek.jpg/1024px-Hospodsky_gulasek.jpg"
+      };
+      const source = images[dish];
+      if (!source) return new Response("Obrázek nenalezen.", { status: 404 });
+      try {
+        const image = await fetch(source, {
+          headers: { "User-Agent": "JidloPoRuce/1.0" },
+          cf: { cacheEverything: true, cacheTtl: 86400 }
+        });
+        if (!image.ok) return new Response("Obrázek se nepodařilo načíst.", { status: 502 });
+        const headers = new Headers(image.headers);
+        headers.set("Cache-Control", "public, max-age=86400");
+        headers.set("Access-Control-Allow-Origin", "*");
+        return new Response(image.body, { status: 200, headers });
+      } catch (error) {
+        return new Response("Chyba při načítání obrázku.", { status: 502 });
+      }
+    }
+
     // Načtení uživatele
     if (url.pathname === "/api/user" && request.method === "GET") {
       const id = url.searchParams.get("id");
