@@ -1640,4 +1640,85 @@ document.querySelectorAll('.store-choice').forEach(a=>{
 });
  init();window.addEventListener('hashchange',()=>setTimeout(init,20));
 })();
+</script>
+<script>
+/* JPR-FILTER-FIX-V1 — vyhledávání a kategorie pro všech 185 jídel */
+(function(){
+  function normalize(value){
+    return String(value || "")
+      .toLocaleLowerCase("cs-CZ")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g,"")
+      .replace(/\s+/g," ")
+      .trim();
+  }
+
+  function initMealFilters(){
+    const search = document.getElementById("mealSearch");
+    const category = document.getElementById("mealCategory");
+    const count = document.getElementById("mealSearchCount");
+    const box = document.getElementById("mealSearchBox");
+    const page = document.getElementById("jidla");
+    if(!search || !category || !count || !box || !page) return;
+
+    const meals = Array.from(page.querySelectorAll(".meal")).filter(function(el){
+      return !!el.querySelector("h3");
+    });
+
+    let empty = document.getElementById("mealSearchEmpty");
+    if(!empty){
+      empty = document.createElement("div");
+      empty.id = "mealSearchEmpty";
+      empty.className = "note";
+      empty.style.marginTop = "12px";
+      empty.style.display = "none";
+      empty.innerHTML = "🔎 <b>Nic jsme nenašli.</b><br>Zkus jiné jídlo nebo změň kategorii.";
+      box.appendChild(empty);
+    }
+
+    function apply(){
+      const q = normalize(search.value);
+      const cat = normalize(category.value);
+      let visible = 0;
+
+      meals.forEach(function(meal){
+        const title = normalize((meal.querySelector("h3") || {}).textContent);
+        const meta = normalize((meal.querySelector(".meta") || {}).textContent);
+        const text = title + " " + meta;
+
+        const matchesSearch = !q || text.includes(q);
+        const matchesCategory = !cat || meta.includes(cat);
+        const show = matchesSearch && matchesCategory;
+
+        meal.style.display = show ? "" : "none";
+        if(show) visible++;
+      });
+
+      if(!q && !cat){
+        count.textContent = "185 jídel";
+      }else{
+        count.textContent = visible + (visible === 1 ? " jídlo" : " jídel");
+      }
+
+      empty.style.display = visible ? "none" : "block";
+    }
+
+    if(!search.dataset.filterBound){
+      search.addEventListener("input", apply);
+      category.addEventListener("change", apply);
+      search.dataset.filterBound = "1";
+    }
+
+    apply();
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", initMealFilters);
+  }else{
+    initMealFilters();
+  }
+  window.addEventListener("hashchange", function(){
+    setTimeout(initMealFilters, 20);
+  });
+})();
 </script></body></html>
