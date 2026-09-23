@@ -46,6 +46,50 @@ export default {
       }
     }
 
+    // JPR-DYNAMIC-COMMONS-V1 – vyhledání a proxy fotek jídel z Wikimedia Commons.
+    if (url.pathname === "/api/food-image" && request.method === "GET") {
+      const name = (url.searchParams.get("name") || "").trim();
+      if (!name) return new Response("Chybí název jídla.", { status: 400 });
+      try {
+        const api = new URL("https://commons.wikimedia.org/w/api.php");
+        api.searchParams.set("action", "query");
+        api.searchParams.set("generator", "search");
+        api.searchParams.set("gsrsearch", name + " food");
+        api.searchParams.set("gsrnamespace", "6");
+        api.searchParams.set("gsrlimit", "5");
+        api.searchParams.set("prop", "imageinfo");
+        api.searchParams.set("iiprop", "url|mime|extmetadata");
+        api.searchParams.set("iiurlwidth", "900");
+        api.searchParams.set("format", "json");
+        const search = await fetch(api.toString(), { headers: { "User-Agent": "JidloPoRuce/1.0" } });
+        if (!search.ok) return new Response("Wikimedia API není dostupné.", { status: 502 });
+        const data = await search.json();
+        const pages = Object.values(data?.query?.pages || {});
+        const page = pages.find(p => {
+          const info = p?.imageinfo?.[0];
+          const mime = info?.thumbmime || info?.mime || "";
+          return /^image\//i.test(mime) && info?.thumburl;
+        });
+        if (!page) return new Response("Fotka nenalezena.", { status: 404 });
+        const info = page.imageinfo[0];
+        const image = await fetch(info.thumburl, { headers: { "User-Agent": "JidloPoRuce/1.0" }, cf: { cacheEverything: true, cacheTtl: 604800 } });
+        if (!image.ok) return new Response("Fotku se nepodařilo načíst.", { status: 502 });
+        const headers = new Headers(image.headers);
+        headers.set("Cache-Control", "public, max-age=604800");
+        headers.set("Access-Control-Allow-Origin", "*");
+        headers.set("Access-Control-Expose-Headers", "X-JPR-Photo-Credit, X-JPR-Photo-License, X-JPR-Photo-Source");
+        const meta = info.extmetadata || {};
+        const artist = String(meta.Artist?.value || "").replace(/<[^>]*>/g, "").trim();
+        const license = String(meta.LicenseShortName?.value || "").replace(/<[^>]*>/g, "").trim();
+        headers.set("X-JPR-Photo-Credit", (artist ? artist + " / " : "") + "Wikimedia Commons");
+        headers.set("X-JPR-Photo-License", license || "Wikimedia Commons");
+        headers.set("X-JPR-Photo-Source", "https://commons.wikimedia.org/wiki/" + encodeURIComponent(page.title).replace(/%2F/g, "/"));
+        return new Response(image.body, { status: 200, headers });
+      } catch (error) {
+        return new Response("Chyba při hledání fotky.", { status: 502 });
+      }
+    }
+
     // Načtení uživatele
     if (url.pathname === "/api/user" && request.method === "GET") {
       const id = url.searchParams.get("id");
