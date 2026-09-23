@@ -61,7 +61,11 @@ export default {
             license: "CC BY 4.0"
           }
         };
-        const direct = known[name.toLocaleLowerCase("cs-CZ")];
+        const normalizeFoodKey = (value) => String(value || "")
+          .toLocaleLowerCase("cs-CZ")
+          .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+          .replace(/\\s+/g, " ").trim();
+        const direct = known[name.toLocaleLowerCase("cs-CZ")] || known[normalizeFoodKey(name)];
         if (direct) {
           const image = await fetch(direct.url, { headers: { "User-Agent": "JidloPoRuce/1.0" }, cf: { cacheEverything: true, cacheTtl: 604800 } });
           if (image.ok) {
@@ -82,7 +86,7 @@ export default {
 
         const normalizePhotoText = (value) => String(value || "")
           .toLocaleLowerCase("cs-CZ")
-          .normalize("NFD").replace(/[\\u0300-\\u036f]/g, "")
+          .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
           .replace(/[^a-z0-9]+/g, " ").trim();
 
         const aliases = {
@@ -101,7 +105,7 @@ export default {
         };
 
         const stop = new Set(["a","s","se","na","do","z","v","ve","pro","po","podle","plus","bez","smes","jidlo","jidel","food"]);
-        const nameTokens = normalizePhotoText(name).split(/\\s+/).filter(t => t.length >= 4 && !stop.has(t));
+        const nameTokens = normalizePhotoText(name).split(/\s+/).filter(t => t.length >= 4 && !stop.has(t));
         const wanted = new Set(nameTokens);
         nameTokens.forEach(t => (aliases[t] || []).forEach(a => wanted.add(a)));
 
@@ -126,8 +130,8 @@ export default {
             const info = candidate?.imageinfo?.[0];
             const mime = info?.thumbmime || info?.mime || "";
             const title = normalizePhotoText(candidate?.title || "");
-            if (!/^image\\//i.test(mime) || !info?.thumburl) continue;
-            if (/\\b(logo|icon|map|flag|diagram|coat of arms|symbol|poster|screenshot)\\b/i.test(title)) continue;
+            if (!/^image\//i.test(mime) || !info?.thumburl) continue;
+            if (/\b(logo|icon|map|flag|diagram|coat of arms|symbol|poster|screenshot)\b/i.test(title)) continue;
             const score = [...wanted].reduce((sum, token) => sum + (title.includes(token) ? 1 : 0), 0);
             if (score > bestScore) {
               bestScore = score;
