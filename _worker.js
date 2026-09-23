@@ -40,11 +40,6 @@ export default {
             credit: "Pohled 111 / Wikimedia Commons",
             license: "CC BY-SA 4.0"
           },
-          "pečené kuře s bramborem": {
-            url: "https://commons.wikimedia.org/wiki/Special:Redirect/file/Pe%C4%8Den%C3%A9_ku%C5%99e_s_r%C3%BD%C5%BE%C3%AD.jpg?width=900",
-            credit: "Dezidor / Wikimedia Commons",
-            license: "CC BY 3.0"
-          },
           "kuřecí řízky s bramborem": {
             url: "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ku%C5%99ec%C3%AD_%C5%99%C3%ADzek%2C_bramborov%C3%A1_ka%C5%A1e.jpg?width=900",
             credit: "Dezidor / Wikimedia Commons",
@@ -54,11 +49,6 @@ export default {
             url: "https://commons.wikimedia.org/wiki/Special:Redirect/file/Bramborov%C3%BD_sal%C3%A1t_s_%C5%99%C3%ADzkem.jpg?width=900",
             credit: "Dezidor / Wikimedia Commons",
             license: "CC BY 3.0"
-          },
-          "rizoto s kuřetem": {
-            url: "https://commons.wikimedia.org/wiki/Special:Redirect/file/Rizoto_z_hov%C4%9Bz%C3%ADho_masa_01.jpg?width=900",
-            credit: "Pohled 111 / Wikimedia Commons",
-            license: "CC BY-SA 4.0"
           },
           "palačinky s tvarohem": {
             url: "https://commons.wikimedia.org/wiki/Special:Redirect/file/Pala%C4%8Dinka.jpg?width=900",
@@ -177,7 +167,7 @@ export default {
         }
 
         // Nikdy nezobrazíme náhodnou fotku jen proto, že Commons něco našlo.
-        if (bestScore === 0) page = null;
+        if (bestScore < 2) page = null;
 
         if (!page) return new Response("Fotka nenalezena.", { status: 404 });
         const info = page.imageinfo[0];
