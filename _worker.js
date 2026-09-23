@@ -49,25 +49,38 @@ export default {
             return new Response(image.body, { status: 200, headers });
           }
         }
-        const api = new URL("https://commons.wikimedia.org/w/api.php");
-        api.searchParams.set("action", "query");
-        api.searchParams.set("generator", "search");
-        api.searchParams.set("gsrsearch", name + " food");
-        api.searchParams.set("gsrnamespace", "6");
-        api.searchParams.set("gsrlimit", "5");
-        api.searchParams.set("prop", "imageinfo");
-        api.searchParams.set("iiprop", "url|mime|extmetadata");
-        api.searchParams.set("iiurlwidth", "900");
-        api.searchParams.set("format", "json");
-        const search = await fetch(api.toString(), { headers: { "User-Agent": "JidloPoRuce/1.0" } });
-        if (!search.ok) return new Response("Wikimedia API není dostupné.", { status: 502 });
-        const data = await search.json();
-        const pages = Object.values(data?.query?.pages || {});
-        const page = pages.find(p => {
-          const info = p?.imageinfo?.[0];
-          const mime = info?.thumbmime || info?.mime || "";
-          return /^image\//i.test(mime) && info?.thumburl;
-        });
+        // Zkusíme několik variant názvu. U českých receptů bývá název příliš dlouhý
+        // a Commons pak vrátí spíš obecný obrázek nebo nic.
+        const baseName = name.replace(/\\s+s\\s+.*$/i, "").trim();
+        const shortName = name.split(/\\s+/).slice(0, 3).join(" ").trim();
+        const queries = [...new Set([name + " food", baseName + " food", shortName + " food"].filter(Boolean))];
+
+        let page = null;
+        for (const query of queries) {
+          const api = new URL("https://commons.wikimedia.org/w/api.php");
+          api.searchParams.set("action", "query");
+          api.searchParams.set("generator", "search");
+          api.searchParams.set("gsrsearch", query);
+          api.searchParams.set("gsrnamespace", "6");
+          api.searchParams.set("gsrlimit", "8");
+          api.searchParams.set("prop", "imageinfo");
+          api.searchParams.set("iiprop", "url|mime|extmetadata");
+          api.searchParams.set("iiurlwidth", "900");
+          api.searchParams.set("format", "json");
+          const search = await fetch(api.toString(), { headers: { "User-Agent": "JidloPoRuce/1.0" } });
+          if (!search.ok) continue;
+          const data = await search.json();
+          const pages = Object.values(data?.query?.pages || {});
+          const candidate = pages.find(p => {
+            const info = p?.imageinfo?.[0];
+            const mime = info?.thumbmime || info?.mime || "";
+            const title = String(p?.title || "").toLowerCase();
+            return /^image\\//i.test(mime) && info?.thumburl &&
+              !/logo|icon|map|flag|diagram|coat of arms|symbol/.test(title);
+          });
+          if (candidate) { page = candidate; break; }
+        }
+
         if (!page) return new Response("Fotka nenalezena.", { status: 404 });
         const info = page.imageinfo[0];
         const image = await fetch(info.thumburl, { headers: { "User-Agent": "JidloPoRuce/1.0" }, cf: { cacheEverything: true, cacheTtl: 604800 } });
