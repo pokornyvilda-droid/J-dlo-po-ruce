@@ -30,6 +30,11 @@ export default {
       try {
         // Ověřené mapování pro nejčastější recepty, kde automatické hledání může trefit kategorii místo fotografie.
         const known = {
+          "pečené kuře s bramborem": {
+            url: "https://commons.wikimedia.org/wiki/Special:Redirect/file/Chicken_with_potato_and_carrot.jpg?width=900",
+            credit: "Ekaterina Kvelidze / Wikimedia Commons",
+            license: "CC BY-SA 4.0"
+          },
           "kuřecí na paprice s rýží": {
             url: "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ku%C5%99e_na_paprice_-_Czech_Republic.jpg?width=900",
             credit: "Pohled 111 / Wikimedia Commons",
