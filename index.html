@@ -1967,4 +1967,124 @@ document.querySelectorAll('.store-choice').forEach(a=>{
   });
 })();
 </script>
+<style id="JPR-RECIPE-APP-V2">
+/* Detail receptu – inspirováno dodaným vzorem, přímo v aplikaci */
+.page[id^="j"] > h1{margin-bottom:8px}
+.page[id^="j"] > .pill{display:inline-block;margin-bottom:14px}
+.page[id^="j"] > .detail{padding:0;background:transparent;border:0;box-shadow:none}
+.jpr-recipe-actions{display:grid;gap:10px;margin:0 0 18px}
+.jpr-recipe-actions .btn{width:100%;margin:0;text-align:center;font-size:16px;padding:14px 16px;border-radius:15px}
+.jpr-recipe-actions .secondary{background:#e7f1e9}
+.jpr-ingredients-box{background:#fff;border:1px solid #e5e2d9;border-radius:18px;overflow:hidden;margin:0 0 22px}
+.jpr-section-title{display:flex;align-items:center;gap:9px;padding:16px 17px 10px;margin:0!important;font-size:21px!important;color:#174f3d!important}
+.jpr-portion-wrap{margin:0 10px 12px}
+.jpr-ingredient-list{padding:0 10px 10px}
+.jpr-ingredient-row{display:flex;justify-content:space-between;gap:12px;padding:10px 10px;border-top:1px solid #ece9e1;font-size:15px;line-height:1.3}
+.jpr-ingredient-row span:first-child{flex:1}
+.jpr-ingredient-row span:last-child{font-weight:700;text-align:right;white-space:nowrap}
+.jpr-steps-box{background:#fff;border:1px solid #e5e2d9;border-radius:18px;padding:0 10px 10px;margin-bottom:18px}
+.jpr-step{display:flex;gap:10px;padding:11px 7px;border-top:1px solid #ece9e1;font-size:15px;line-height:1.45}
+.jpr-step-num{flex:0 0 30px;height:30px;border-radius:50%;background:#e6f2e9;color:#174f3d;display:grid;place-items:center;font-weight:800}
+.jpr-step-text{padding-top:3px}
+.jpr-tip{margin:12px 0 16px!important}
+@media(max-width:560px){
+ .page[id^="j"] > h1{font-size:31px}
+ .jpr-ingredient-row{font-size:14px}
+ .jpr-step{font-size:14px}
+}
+</style>
+<script id="JPR-RECIPE-APP-V2">
+(function(){
+  function splitIngredients(text){
+    return String(text||'').split(/,\s*/).map(x=>x.trim()).filter(Boolean);
+  }
+  function splitSteps(text){
+    const s=String(text||'').trim();
+    if(!s)return [];
+    const parts=s.split(/(?<=[.!?])\s+(?=[A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ])/u).map(x=>x.trim()).filter(Boolean);
+    return parts.length>1?parts:[s];
+  }
+  function renderIngredients(section,p){
+    const box=section.querySelector('.jpr-ingredient-list');
+    if(!box)return;
+    const items=splitIngredients(p.textContent);
+    box.innerHTML=items.map(item=>{
+      const m=item.match(/^(.*?)(\s+\d+(?:[.,]\d+)?\s*(?:g|kg|ml|l|ks|stroužky?|lžíce?|lžičky?|dl|cl))$/i);
+      if(m) return '<div class="jpr-ingredient-row"><span>'+m[1]+'</span><span>'+m[2].trim()+'</span></div>';
+      const m2=item.match(/^(.*?)(\s+\d+(?:[.,]\d+)?)$/i);
+      if(m2) return '<div class="jpr-ingredient-row"><span>'+m2[1]+'</span><span>'+m2[2].trim()+'</span></div>';
+      return '<div class="jpr-ingredient-row"><span>'+item+'</span><span></span></div>';
+    }).join('');
+    p.style.display='none';
+  }
+  function renderSteps(section,p){
+    const box=section.querySelector('.jpr-steps-list');
+    if(!box)return;
+    const items=splitSteps(p.textContent);
+    box.innerHTML=items.map((x,i)=>'<div class="jpr-step"><span class="jpr-step-num">'+(i+1)+'</span><span class="jpr-step-text">'+x+'</span></div>').join('');
+    p.style.display='none';
+  }
+  function enhance(section){
+    if(!section || section.dataset.jprRecipeV2)return;
+    const detail=section.querySelector(':scope > .detail');
+    if(!detail)return;
+    const headings=[...detail.querySelectorAll(':scope > h2')];
+    const ingH=headings.find(h=>/Suroviny/i.test(h.textContent));
+    const procH=headings.find(h=>/Postup/i.test(h.textContent));
+    if(!ingH||!procH)return;
+    const ingP=ingH.nextElementSibling;
+    const procP=procH.nextElementSibling;
+    if(!ingP||!procP)return;
+
+    const actions=document.createElement('div');
+    actions.className='jpr-recipe-actions';
+    const cart=detail.querySelector('a.btn[href="#nakup"]');
+    const fav=document.createElement('button');
+    fav.type='button'; fav.className='btn secondary'; fav.innerHTML='♥ Přidat mezi oblíbené';
+    fav.onclick=function(){
+      const id=Number((section.id||'').replace('j',''));
+      if(!id)return;
+      window.S=window.S||{};
+      S.favs=Array.isArray(S.favs)?S.favs:[];
+      if(!S.favs.includes(id))S.favs.push(id);
+      if(typeof save==='function')save();
+      fav.innerHTML='♥ Přidáno mezi oblíbené';
+    };
+    if(cart){cart.textContent='🛒 Přidat na nákupní seznam';actions.appendChild(cart); }
+    actions.appendChild(fav);
+    detail.insertBefore(actions,ingH);
+
+    const ingBox=document.createElement('div');
+    ingBox.className='jpr-ingredients-box';
+    ingH.className='jpr-section-title'; ingH.textContent='🛒 Suroviny';
+    ingBox.appendChild(ingH);
+    const portion=detail.querySelector('.jpr-portion-picker');
+    if(portion) { portion.classList.add('jpr-portion-wrap'); ingBox.appendChild(portion); }
+    ingBox.appendChild(ingP);
+    const list=document.createElement('div'); list.className='jpr-ingredient-list'; ingBox.appendChild(list);
+    detail.insertBefore(ingBox,procH);
+
+    const stepsBox=document.createElement('div'); stepsBox.className='jpr-steps-box';
+    procH.className='jpr-section-title'; procH.textContent='👨‍🍳 Postup';
+    stepsBox.appendChild(procH); stepsBox.appendChild(procP);
+    const steps=document.createElement('div'); steps.className='jpr-steps-list'; stepsBox.appendChild(steps);
+    detail.insertBefore(stepsBox,ingBox.nextSibling);
+
+    const note=detail.querySelector('.note');
+    if(note) note.classList.add('jpr-tip');
+
+    renderIngredients(section,ingP);
+    renderSteps(section,procP);
+
+    const observer=new MutationObserver(()=>renderIngredients(section,ingP));
+    observer.observe(ingP,{characterData:true,childList:true,subtree:true});
+    section.dataset.jprRecipeV2='1';
+  }
+  function init(){
+    document.querySelectorAll('.page[id^="j"]').forEach(enhance);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+  window.addEventListener('hashchange',()=>setTimeout(init,50));
+})();
+</script>
 </body></html>
