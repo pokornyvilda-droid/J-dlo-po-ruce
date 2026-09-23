@@ -41,7 +41,12 @@ export default {
             license: "CC BY-SA 4.0"
           },
           "kuřecí řízky s bramborem": {
-            url: "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ku%C5%99ec%C3%AD_%C5%99%C3%ADzek%2C_bramborov%C3%A1_ka%C5%A1e.jpg?width=900",
+            url: "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ku%C5%99ec%C3%AD_%C5%99%C3%ADzek_ve_strouhnace_se_sezamem%2C_brambory%2C_obloha.jpg?width=900",
+            credit: "Dezidor / Wikimedia Commons",
+            license: "CC BY 3.0"
+          },
+          "rajská s masovými kuličkami": {
+            url: "https://commons.wikimedia.org/wiki/Special:Redirect/file/Masov%C3%A9_kuli%C4%8Dky_s_rajskou%2C_houskov%C3%A9_knedl%C3%ADky.jpg?width=900",
             credit: "Dezidor / Wikimedia Commons",
             license: "CC BY 3.0"
           },
