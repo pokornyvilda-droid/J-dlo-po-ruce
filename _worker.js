@@ -28,6 +28,27 @@ export default {
       const name = (url.searchParams.get("name") || "").trim();
       if (!name) return new Response("Chybí název jídla.", { status: 400 });
       try {
+        // Ověřené mapování pro nejčastější recepty, kde automatické hledání může trefit kategorii místo fotografie.
+        const known = {
+          "kuřecí na paprice s rýží": {
+            url: "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ku%C5%99e_na_paprice_-_Czech_Republic.jpg?width=900",
+            credit: "Pohled 111 / Wikimedia Commons",
+            license: "CC BY-SA 4.0"
+          }
+        };
+        const direct = known[name.toLocaleLowerCase("cs-CZ")];
+        if (direct) {
+          const image = await fetch(direct.url, { headers: { "User-Agent": "JidloPoRuce/1.0" }, cf: { cacheEverything: true, cacheTtl: 604800 } });
+          if (image.ok) {
+            const headers = new Headers(image.headers);
+            headers.set("Cache-Control", "public, max-age=604800");
+            headers.set("Access-Control-Allow-Origin", "*");
+            headers.set("Access-Control-Expose-Headers", "X-JPR-Photo-Credit, X-JPR-Photo-License");
+            headers.set("X-JPR-Photo-Credit", direct.credit);
+            headers.set("X-JPR-Photo-License", direct.license);
+            return new Response(image.body, { status: 200, headers });
+          }
+        }
         const api = new URL("https://commons.wikimedia.org/w/api.php");
         api.searchParams.set("action", "query");
         api.searchParams.set("generator", "search");
