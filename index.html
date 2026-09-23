@@ -2061,8 +2061,10 @@ document.querySelectorAll('.store-choice').forEach(a=>{
     const ingH=headings.find(h=>/Suroviny/i.test(h.textContent));
     const procH=headings.find(h=>/Postup/i.test(h.textContent));
     if(!ingH||!procH)return;
-    const ingP=ingH.nextElementSibling;
-    const procP=procH.nextElementSibling;
+    const ingIndex=Array.from(detail.children).indexOf(ingH);
+    const procIndex=Array.from(detail.children).indexOf(procH);
+    const ingP=[...detail.children].find((el,i)=>i>ingIndex && el.tagName==='P');
+    const procP=[...detail.children].find((el,i)=>i>procIndex && el.tagName==='P');
     if(!ingP||!procP)return;
 
     const actions=document.createElement('div');
@@ -2088,10 +2090,7 @@ document.querySelectorAll('.store-choice').forEach(a=>{
     ingH.className='jpr-section-title'; ingH.textContent='🛒 Ingredience (4 porce)';
     ingBox.appendChild(ingH);
     const portion=detail.querySelector('.jpr-portion-picker');
-    if(portion) {
-      portion.classList.add('jpr-portion-wrap');
-      portion.style.display='none';
-    }
+    if(portion) portion.remove();
     ingBox.appendChild(ingP);
     const list=document.createElement('div'); list.className='jpr-ingredient-list'; ingBox.appendChild(list);
     detail.insertBefore(ingBox,procH);
@@ -2116,7 +2115,8 @@ document.querySelectorAll('.store-choice').forEach(a=>{
     document.querySelectorAll('.page[id^="j"]').forEach(enhance);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
-  window.addEventListener('hashchange',()=>setTimeout(init,50));
+  window.addEventListener('hashchange',()=>setTimeout(init,80));
+  setTimeout(init,250);
 })();
 </script>
 </body></html>
