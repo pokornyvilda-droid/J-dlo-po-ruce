@@ -87,20 +87,6 @@ export default {
         }
         // Zkusíme několik variant názvu. U českých receptů bývá název příliš dlouhý
         // a Commons pak vrátí spíš obecný obrázek nebo nic.
-        const baseName = name.replace(/\s+s\s+.*$/i, "").trim();
-        const shortName = name.split(/\s+/).slice(0, 3).join(" ").trim();
-        const translatedTokens = normalizePhotoText(name).split(/\s+/)
-          .flatMap(t => aliases[t] || [])
-          .filter(Boolean);
-        const englishName = [...new Set(translatedTokens)].slice(0, 6).join(" ");
-        const queries = [...new Set([
-          name + " food",
-          baseName + " food",
-          shortName + " food",
-          englishName ? englishName + " food" : "",
-          englishName ? englishName : ""
-        ].filter(Boolean))];
-
         const normalizePhotoText = (value) => String(value || "")
           .toLocaleLowerCase("cs-CZ")
           .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
@@ -140,6 +126,20 @@ export default {
           dezert:["dessert"], buchta:["cake"], kolac:["cake","pie"], buchtа:["cake"],
           palačinky:["pancakes"], bramborovy:["potato"], bramborove:["potato"]
         };
+
+        const baseName = name.replace(/\s+s\s+.*$/i, "").trim();
+        const shortName = name.split(/\s+/).slice(0, 3).join(" ").trim();
+        const translatedTokens = normalizePhotoText(name).split(/\s+/)
+          .flatMap(t => aliases[t] || [])
+          .filter(Boolean);
+        const englishName = [...new Set(translatedTokens)].slice(0, 6).join(" ");
+        const queries = [...new Set([
+          name + " food",
+          baseName + " food",
+          shortName + " food",
+          englishName ? englishName + " food" : "",
+          englishName ? englishName : ""
+        ].filter(Boolean))];
 
         const stop = new Set(["a","s","se","na","do","z","v","ve","pro","po","podle","plus","bez","smes","jidlo","jidel","food"]);
         const nameTokens = normalizePhotoText(name).split(/\s+/).filter(t => t.length >= 4 && !stop.has(t));
