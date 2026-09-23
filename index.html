@@ -274,7 +274,100 @@ a:hover{
 .jpr-photo-wrap{margin:0}
 .jpr-photo-wrap .meal-photo{margin-bottom:0}
 </style>
-</head><body><div class="app"><header class="head"><div class="logo">JÍDLO PO RUCE</div><div class="tag">Méně rozhodování · méně zbytečných nákupů · více klidu</div></header><main><section class="home"><div class="home-art"><img alt="Jídlo po ruce – domácí obrazovka" src="rs-hero.png?v=185"/><div aria-label="Hlavní nabídka" class="hotspots"><a aria-label="Nevím, co jíst" class="hs hs-nevim" href="#q1"></a><a aria-label="Jsem doma" class="hs hs-doma" href="#doma"></a><a aria-label="Po tréninku" class="hs hs-trenink" href="#trenink"></a><a aria-label="Na cestách" class="hs hs-cesty" href="#cesty"></a><a aria-label="Do 10 minut" class="hs hs-rychle" href="#rychle"></a><a aria-label="Co mám doma" class="hs hs-mamdoma" href="#mamdoma"></a><a aria-label="Nákup" class="hs hs-nakup" href="#nakup"></a><a aria-label="Všech 185 jídel" class="hs hs-jidla" href="#jidla"></a><a aria-label="Vyfoť lednici" class="hs hs-fotodom" href="#fotodom"></a><a aria-label="Domů" class="hs hs-nav-home" href="#"></a><a aria-label="Jídla" class="hs hs-nav-jidla" href="#jidla"></a><a aria-label="Nákup" class="hs hs-nav-nakup" href="#nakup"></a><a aria-label="Oblíbené" class="hs hs-nav-oblibene" href="#oblubene"></a><a aria-label="Můj profil" class="hs hs-nav-profil" href="#profil"></a></div></div></section><section class="page" id="doma"><a class="btn secondary" href="#">← Domů</a><div class="hero"><h1>🍲 Jsem doma</h1><p>3 první volby a pak celý výběr.</p></div><div class="meal-list"><a class="meal" href="#j1"><h3>Kuřecí na paprice s rýží</h3><span class="pill">30 min</span></a><a class="meal" href="#j9"><h3>Vepřové na šťávě s rýží</h3><span class="pill">45 min</span></a><a class="meal" href="#j5"><h3>Špagety s boloňskou omáčkou</h3><span class="pill">30 min</span></a></div><a class="btn" href="#jidla">🍲 Chci něco jiného → všech 185</a></section>
+<style id="JPR-RECIPE-DETAIL-V1">
+/* Vzhled detailu receptu – bez závislosti na fotografii */
+.page[id^="j"]{
+  max-width:760px;
+  margin:0 auto;
+  padding-bottom:28px;
+}
+.page[id^="j"] > .btn.secondary{
+  margin:2px 0 14px;
+  background:rgba(255,255,255,.82);
+  border:1px solid var(--line);
+  color:var(--green);
+  box-shadow:none;
+}
+.page[id^="j"] > h1{
+  margin:6px 0 10px;
+  font-size:clamp(30px,7vw,46px);
+  line-height:1.02;
+  letter-spacing:-1.2px;
+  font-weight:900;
+  max-width:680px;
+}
+.page[id^="j"] > .pill{
+  margin:0 0 16px;
+  background:#eaf4ee;
+  color:var(--green);
+  padding:8px 12px;
+  font-size:12px;
+}
+.page[id^="j"] > .detail{
+  margin-top:0;
+  padding:0;
+  overflow:hidden;
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:24px;
+  box-shadow:var(--shadow);
+}
+.page[id^="j"] > .detail > h2{
+  margin:0;
+  padding:18px 20px 10px;
+  font-size:18px;
+  color:var(--green);
+  letter-spacing:-.2px;
+}
+.page[id^="j"] > .detail > h2:first-child{
+  padding-top:21px;
+}
+.page[id^="j"] > .detail > h2 + p{
+  margin:0 16px 8px;
+  padding:15px 16px;
+  background:#f1f6f2;
+  border:1px solid #e1ebe4;
+  border-radius:16px;
+  color:var(--ink);
+  font-size:15px;
+  line-height:1.65;
+}
+.page[id^="j"] > .detail > h2:nth-of-type(2){
+  padding-top:22px;
+}
+.page[id^="j"] > .detail > h2:nth-of-type(2) + p{
+  background:transparent;
+  border:0;
+  padding:4px 20px 12px;
+  margin:0;
+  font-size:15px;
+  line-height:1.7;
+}
+.page[id^="j"] > .detail > .note{
+  margin:8px 16px 16px;
+  background:#fff8df;
+  border-left:0;
+  border:1px solid #f1e4b9;
+  border-radius:15px;
+  padding:13px 15px;
+}
+.page[id^="j"] > .detail > .btn{
+  margin:0 6px 18px 16px;
+}
+.page[id^="j"] > .detail > .btn.secondary{
+  margin-left:0;
+}
+@media(max-width:560px){
+  .page[id^="j"]{padding:0 2px 24px}
+  .page[id^="j"] > h1{font-size:31px}
+  .page[id^="j"] > .detail{border-radius:21px}
+  .page[id^="j"] > .detail > h2{padding-left:17px;padding-right:17px}
+  .page[id^="j"] > .detail > h2 + p{margin-left:12px;margin-right:12px}
+  .page[id^="j"] > .detail > h2:nth-of-type(2) + p{padding-left:17px;padding-right:17px}
+  .page[id^="j"] > .detail > .note{margin-left:12px;margin-right:12px}
+  .page[id^="j"] > .detail > .btn{display:block;margin:8px 12px}
+}
+</style></head><body><div class="app"><header class="head"><div class="logo">JÍDLO PO RUCE</div><div class="tag">Méně rozhodování · méně zbytečných nákupů · více klidu</div></header><main><section class="home"><div class="home-art"><img alt="Jídlo po ruce – domácí obrazovka" src="rs-hero.png?v=185"/><div aria-label="Hlavní nabídka" class="hotspots"><a aria-label="Nevím, co jíst" class="hs hs-nevim" href="#q1"></a><a aria-label="Jsem doma" class="hs hs-doma" href="#doma"></a><a aria-label="Po tréninku" class="hs hs-trenink" href="#trenink"></a><a aria-label="Na cestách" class="hs hs-cesty" href="#cesty"></a><a aria-label="Do 10 minut" class="hs hs-rychle" href="#rychle"></a><a aria-label="Co mám doma" class="hs hs-mamdoma" href="#mamdoma"></a><a aria-label="Nákup" class="hs hs-nakup" href="#nakup"></a><a aria-label="Všech 185 jídel" class="hs hs-jidla" href="#jidla"></a><a aria-label="Vyfoť lednici" class="hs hs-fotodom" href="#fotodom"></a><a aria-label="Domů" class="hs hs-nav-home" href="#"></a><a aria-label="Jídla" class="hs hs-nav-jidla" href="#jidla"></a><a aria-label="Nákup" class="hs hs-nav-nakup" href="#nakup"></a><a aria-label="Oblíbené" class="hs hs-nav-oblibene" href="#oblubene"></a><a aria-label="Můj profil" class="hs hs-nav-profil" href="#profil"></a></div></div></section><section class="page" id="doma"><a class="btn secondary" href="#">← Domů</a><div class="hero"><h1>🍲 Jsem doma</h1><p>3 první volby a pak celý výběr.</p></div><div class="meal-list"><a class="meal" href="#j1"><h3>Kuřecí na paprice s rýží</h3><span class="pill">30 min</span></a><a class="meal" href="#j9"><h3>Vepřové na šťávě s rýží</h3><span class="pill">45 min</span></a><a class="meal" href="#j5"><h3>Špagety s boloňskou omáčkou</h3><span class="pill">30 min</span></a></div><a class="btn" href="#jidla">🍲 Chci něco jiného → všech 185</a></section>
 <section class="page" id="trenink"><a class="btn secondary" href="#">← Domů</a><div class="hero"><h1>💪 Právě jsem docvičil</h1><p>Vyber, kde právě jsi. Dám ti víc možností, ne jen jednu.</p></div><div class="grid"><a class="choice" href="#postdoma"><h3>🏠 Doma</h3><p class="muted">8 rychlých variant.</p></a><a class="choice" href="#postobchod"><h3>🛒 Obchod</h3><p class="muted">Nakoupíš a můžeš jíst hned.</p></a><a class="choice" href="#postbenzin"><h3>⛽ Benzínka</h3><p class="muted">Praktické volby bez vaření.</p></a><a class="choice" href="#postrest"><h3>🍽️ Restaurace</h3><p class="muted">Jak si vybrat po tréninku.</p></a><a class="choice" href="#postmicro"><h3>📦 Mikrovlnka</h3><p class="muted">Hotové jídlo za pár minut.</p></a></div></section>
 <section class="page" id="postdoma"><a class="btn secondary" href="#trenink">← Zpět</a><div class="hero"><h1>🏠 Po tréninku · doma</h1><p>8 praktických variant s důrazem na bílkoviny a jednoduchost.</p></div><div class="meal-list"><a class="meal" href="#j16"><div><h3>Kuře + rýže + zelenina</h3><div class="meta">po tréninku · 25 min</div></div><span class="pill">Detail</span></a><a class="meal" href="#j23"><div><h3>Vaječná tortilla</h3><div class="meta">po tréninku · 10 min</div></div><span class="pill">Detail</span></a><a class="meal" href="#j21"><div><h3>Tvaroh s ovocem</h3><div class="meta">po tréninku · 3 min</div></div><span class="pill">Detail</span></a><a class="meal" href="#j28"><div><h3>Kuřecí kuskus</h3><div class="meta">po tréninku · 15 min</div></div><span class="pill">Detail</span></a><a class="meal" href="#j29"><div><h3>Šunka + cottage toast</h3><div class="meta">po tréninku · 8 min</div></div><span class="pill">Detail</span></a><a class="meal" href="#j32"><div><h3>Ovesná kaše se skyrem</h3><div class="meta">po tréninku · 7 min</div></div><span class="pill">Detail</span></a><a class="meal" href="#j33"><div><h3>Vaječná rýže</h3><div class="meta">po tréninku · 15 min</div></div><span class="pill">Detail</span></a><a class="meal" href="#j31"><div><h3>Kuřecí quesadilla</h3><div class="meta">po tréninku · 15 min</div></div><span class="pill">Detail</span></a></div><a class="btn" href="#postvice">🔄 Chci něco jiného → další varianty</a></section>
 <section class="page" id="postobchod"><a class="btn secondary" href="#trenink">← Zpět</a><div class="hero"><h1>🛒 Po tréninku · obchod</h1><p>8 praktických variant s důrazem na bílkoviny a jednoduchost.</p></div><div class="meal-list"><a class="meal" href="#j17"><div><h3>Tuňáková tortilla</h3><div class="meta">po tréninku · 10 min</div></div><span class="pill">Detail</span></a><a class="meal" href="#j19"><div><h3>Cottage + pečivo + zelenina</h3><div class="meta">po tréninku · 3 min</div></div><span class="pill">Detail</span></a><a class="meal" href="#j24"><div><h3>Kuřecí salát s pečivem</h3><div class="meta">po tréninku · 15 min</div></div><span class="pill">Detail</span></a><a class="meal" href="#j29"><div><h3>Šunka + cottage toast</h3><div class="meta">po tréninku · 8 min</div></div><span class="pill">Detail</span></a><a class="meal" href="#j30"><div><h3>Tuňáková rýžová miska</h3><div class="meta">po tréninku · 15 min</div></div><span class="pill">Detail</span></a><a class="meal" href="#j34"><div><h3>Skyr + banán + pečivo se šunkou</h3><div class="meta">po tréninku · 5 min</div></div><span class="pill">Detail</span></a><a class="meal" href="#j47"><div><h3>Kuřecí wrap z hotového masa</h3><div class="meta">po tréninku · 5 min</div></div><span class="pill">Detail</span></a><a class="meal" href="#j48"><div><h3>Mozzarella + šunka + pečivo</h3><div class="meta">po tréninku · 5 min</div></div><span class="pill">Detail</span></a></div><a class="btn" href="#postvice">🔄 Chci něco jiného → další varianty</a></section>
