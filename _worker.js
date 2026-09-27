@@ -241,6 +241,56 @@ export default {
       }
     }
 
+    // JPR-ANALYTICS-V1 – anonymní agregované měření používání aplikace.
+    // Neukládáme IP, user-agent ani identifikátor zařízení; pouze počty událostí za den.
+    if (url.pathname === "/api/analytics" && request.method === "POST") {
+      try {
+        const body = await request.json();
+        const allowed = new Set(["page_view","meal_open","search","cart_add","favorite","portion_change","shopping_open"]);
+        const event = String(body?.event || "");
+        if (!allowed.has(event)) return json({ success: false, error: "Neplatná událost." }, 400);
+
+        const day = new Date().toISOString().slice(0, 10);
+        await env.DB.prepare(
+          `CREATE TABLE IF NOT EXISTS analytics_daily (
+             day TEXT NOT NULL,
+             event TEXT NOT NULL,
+             count INTEGER NOT NULL DEFAULT 0,
+             PRIMARY KEY (day, event)
+           )`
+        ).run();
+        await env.DB.prepare(
+          `INSERT INTO analytics_daily (day, event, count) VALUES (?, ?, 1)
+           ON CONFLICT(day, event) DO UPDATE SET count = count + 1`
+        ).bind(day, event).run();
+        return json({ success: true });
+      } catch (error) {
+        return json({ success: false, error: String(error) }, 500);
+      }
+    }
+
+    if (url.pathname === "/api/analytics" && request.method === "GET") {
+      try {
+        await env.DB.prepare(
+          `CREATE TABLE IF NOT EXISTS analytics_daily (
+             day TEXT NOT NULL,
+             event TEXT NOT NULL,
+             count INTEGER NOT NULL DEFAULT 0,
+             PRIMARY KEY (day, event)
+           )`
+        ).run();
+        const rows = await env.DB.prepare(
+          `SELECT day, event, count
+           FROM analytics_daily
+           WHERE day >= date('now', '-14 days')
+           ORDER BY day DESC, event ASC`
+        ).all();
+        return json({ success: true, days: rows.results || [] });
+      } catch (error) {
+        return json({ success: false, error: String(error) }, 500);
+      }
+    }
+
     // Načtení uživatele
     if (url.pathname === "/api/user" && request.method === "GET") {
       const id = url.searchParams.get("id");
