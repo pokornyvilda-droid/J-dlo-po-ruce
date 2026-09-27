@@ -2119,4 +2119,58 @@ document.querySelectorAll('.store-choice').forEach(a=>{
   setTimeout(init,250);
 })();
 </script>
+<!-- JPR-ANALYTICS-V1 -->
+<script>
+(function(){
+  const endpoint="/api/analytics";
+  const allowed=new Set(["page_view","meal_open","search","cart_add","favorite","portion_change","shopping_open"]);
+  function track(event){
+    if(!allowed.has(event)) return;
+    const body=JSON.stringify({event});
+    try{
+      if(navigator.sendBeacon){
+        navigator.sendBeacon(endpoint,new Blob([body],{type:"application/json"}));
+      }else{
+        fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/json"},body,keepalive:true}).catch(()=>{});
+      }
+    }catch(e){}
+  }
+  function trackHash(){
+    const hash=location.hash||"";
+    if(/^#j\d+$/.test(hash)) track("meal_open");
+    else if(hash==="#nakup") track("shopping_open");
+  }
+  function init(){
+    track("page_view");
+    trackHash();
+
+    const search=document.getElementById("mealSearch");
+    if(search && !search.dataset.analyticsBound){
+      let timer;
+      search.addEventListener("input",function(){
+        clearTimeout(timer);
+        timer=setTimeout(function(){
+          if(String(search.value||"").trim().length>=2) track("search");
+        },900);
+      });
+      search.dataset.analyticsBound="1";
+    }
+
+    if(!document.body.dataset.analyticsClicks){
+      document.addEventListener("click",function(e){
+        const el=e.target.closest("button,a");
+        if(!el) return;
+        const text=String(el.textContent||"").toLocaleLowerCase("cs-CZ");
+        if(el.matches(".jpr-portion-btn,.portion-btn") || /počet porcí|\b[124] porce\b/.test(text)) track("portion_change");
+        else if(/přidat na nákup|do nákupu|přidat suroviny/.test(text)) track("cart_add");
+        else if(/oblíben/.test(text)) track("favorite");
+      });
+      document.body.dataset.analyticsClicks="1";
+    }
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init);
+  else init();
+  window.addEventListener("hashchange",trackHash);
+})();
+</script>
 </body></html>
